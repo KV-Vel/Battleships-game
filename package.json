@@ -4,7 +4,7 @@
     "description": "Battleships game for TOP curriculum",
     "main": "index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
+        "test": "jest --verbose --coverage",
         "build": "webpack --mode=development",
         "production": "webpack --mode=production",
         "start": "webpack serve --open"
@@ -13,7 +13,10 @@
     "author": "",
     "license": "ISC",
     "devDependencies": {
+        "@babel/core": "^7.26.9",
+        "@babel/preset-env": "^7.26.9",
         "@eslint/js": "^9.20.0",
+        "babel-jest": "^29.7.0",
         "css-loader": "^7.1.2",
         "eslint": "^8.57.1",
         "eslint-config-airbnb": "^19.0.4",
