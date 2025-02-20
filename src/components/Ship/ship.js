@@ -4,6 +4,7 @@ export default class Ship {
 
     constructor(length) {
         this.length = length;
+        this.identificator = new Date().getTime().toString();
     }
 
     get hitTimes() {
