@@ -118,14 +118,15 @@ export default class Gameboard {
 
             for (const coordinate of coordinates) {
                 const separatedCoordinates = coordinate.split(',');
-                const [newX, newY] = separatedCoordinates;
+                let [newX, newY] = separatedCoordinates;
 
                 // Converting string input to number
                 newX = Number(newX);
                 newY = Number(newY);
 
                 // Filtering only valid surrounding coordinates. e.g ship placed in the corner with negative values close
-                if (!this.#isCellValid(x + newX, y + newY) && ['X', '?'].includes(this.getCell(x + newX, y + newY))) continue;
+                if (!this.#isCellValid(x + newX, y + newY)) continue;
+                // if (!['X', '?'].includes(this.getCell(x + newX, y + newY))) continue;
 
                 acc.push([x + newX, y + newY].toString());
             }
@@ -151,7 +152,7 @@ export default class Gameboard {
         return freeCoordinates.length === inputedCoordinates.length;
     };
 
-    #isCoordinatesValid(inputedCoordinates, options = {}) {
+    #isCoordinatesValid(inputedCoordinates) {
         const validCoordinates = inputedCoordinates.filter((coordinate) => {
             const separatedNums = coordinate.split(",");
             const [x, y] = separatedNums;
