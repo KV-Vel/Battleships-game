@@ -1,13 +1,16 @@
+    // @todo placeShipsRandomly(coordinates, shipSize) clear board before this function 
+
 export default class Gameboard {
     #gameboard;
     #ships = {
         shipsOnBoard: 0,
         // here will be placed ship identificator and it's surrounding cells
     };
-
-    constructor() {
-        this.rows = 10;
-        this.cols = 10;
+    
+    constructor(rows, cols) {
+        this.rows = rows;
+        this.cols = cols;
+        // this.randomizer = randomizer;
         this.#gameboard = this.#createBoard(this.rows, this.cols);
     }
 
@@ -17,7 +20,10 @@ export default class Gameboard {
         if (!this.#isCoordinatesValid(coordinates)) return false;
         if (!this.#isCoordinatesFree(coordinates)) return false;
 
-        coordinates.forEach(([x, y]) => {
+        coordinates.forEach((coordinate) => {
+            const separatedNums = coordinate.split(",");
+            const [x, y] = separatedNums;
+
             this.#gameboard[x][y] = ship;
         });
 
@@ -27,14 +33,23 @@ export default class Gameboard {
         // Will be used to circle ship when it is destroyed or placed
         this.#ships[ship.identificator] = blockedCells;
 
-        return true; // do i need to return true here?
+        return { coordinates, blockedCells };
     }
 
-    receiveAttack(x, y) {
-        if (!this.#isCoordinatesValid([[x, y]])) return;
+    placeShipRandomly(ship) {
+        const randomCoordinates = this.randomizer.generateRandomCoordinates(
+            ship.length,
+        );
+        const shipCoordinates = this.placeShip(randomCoordinates, ship);
+    }
 
-        if (this.#gameboard[x][y] && this.#gameboard[x][y] !== "X") {
-            const ship = this.#gameboard[x][y];
+    receiveAttack(x,y) {
+        if (!this.#isCellValid(x,y)) return; 
+
+        const cell = this.getCell(x,y);
+
+        if (!['?', 'X'].includes(cell)) {
+            const ship = this.getCell(x,y);
             ship.hit();
 
             if (ship.isSunk()) {
@@ -51,85 +66,15 @@ export default class Gameboard {
         return this.#ships.shipsOnBoard === 0;
     }
 
-    getCell(x, y) {
-        if (!this.#isCoordinatesValid([[x, y]])) return null;
+    getCell(x,y) {
+        if (!this.#isCellValid(x,y)) return;
+
         return this.#gameboard[x][y];
     }
 
     clearBoard() {
         this.#gameboard = this.#createBoard(this.rows, this.cols);
     }
-
-    // @todo placeShipsRandomly(coordinates, shipSize) clear board before this function --> HOW TO MAKE IT PROVIDE ADJACENT CELLS AND ONLY FOR VERTICALL AND HORIZONTAL AXIS
-    // ДОБАВИТЬ ТЕСТЫ С ВЕРТИКАЛЬНЫМ РАСПОЛОЖЕНИЕМ КОРАБЛЕЙ!
-    placeShipRandomly() {
-        const getRandomNum = (max, min) => {
-            return Math.floor(Math.random() * (max - min)) + min;
-        };
-
-        const [x, y] = [getRandomNum(1, 10), getRandomNum(1, 10)];
-
-        const availableShipPlacements = {
-            '4': [],
-            '3': [],
-            '2': [],
-            '1': [],
-        }
-
-        for (let i = 0; i < this.cols; i++) {
-            for (let j = 0; j < this.rows; j++) {
-                const coordinates = this.coordinatesConstructor([i,j]);
-                const validRows = coordinates.rows.filter((row) => this.#isCoordinatesValid(row));
-                const validCols = coordinates.cols.filter((col) => this.#isCoordinatesValid(col));
-                
-                // Identical time of iterations, so we can push both rows and cols at the same time
-                validRows.forEach(row => {
-                    const length = row.length;
-                    
-                    availableShipPlacements[length].push(row);
-                })
-
-                validCols.forEach(col => {
-                    const length = col.length;
-                    
-                    availableShipPlacements[length].push(col);
-                })
-            }
-        }
-       
-    
-    
-        
-      
-    }
-    // make data folder for ships e.g. {'Carrier': 4} 4 is length
-
-    coordinatesConstructor = (initialCoords) => {
-        const [x, y] = initialCoords;
-
-        const rowsTwo = [initialCoords, [x, y + 1]];
-        const rowsThree = [...rowsTwo, [x, y + 2]];
-        const rowsFour = [...rowsThree, [x, y + 3]];
-
-        const colsTwo = [initialCoords, [x + 1, y]];
-        const colsThree = [...colsTwo, [x + 2, y]];
-        const colsFour = [...colsThree, [x + 3, y]];
-
-        return {
-            rows: [
-                [initialCoords],
-                rowsTwo,
-                rowsThree,
-                rowsFour,
-            ],
-            cols: [
-                [initialCoords],
-                colsTwo,
-                colsThree,
-                colsFour,
-            ],
-        };
-    };
 
     get gameboard() {
         return this.#gameboard;
@@ -140,7 +85,7 @@ export default class Gameboard {
     }
 
     #createBoard(rows, cols) {
-        return [...Array(rows)].map(() => Array(cols).fill(false));
+        return [...Array(rows)].map(() => Array(cols).fill('?'));
     }
 
     #surroundShipWithBlockedCells(shipCoordinates) {
@@ -148,53 +93,76 @@ export default class Gameboard {
             this.#getSurroundingShipCells(shipCoordinates);
         return cellsSurroundingShip.reduce((acc, str) => {
             //converting to array. After being stored in Set
-            const [x, y] = [...str.split(",")];
+            const separatedNums = str.split(",");
+            const [x, y] = separatedNums;
 
             this.#gameboard[x][y] = "X";
 
-            return [...acc, [x, y]];
+            return [...acc, str];
         }, []);
     }
 
     #getSurroundingShipCells(coordinates) {
-        const allPossibleCoordinates = coordinates.reduce((acc, [x, y]) => {
-            // mapping possible values around ship
-            acc.push([x - 1, y - 1]);
-            acc.push([x - 1, y]);
-            acc.push([x - 1, y + 1]);
-            acc.push([x, y - 1]);
-            acc.push([x, y + 1]);
-            acc.push([x + 1, y - 1]);
-            acc.push([x + 1, y]);
-            acc.push([x + 1, y + 1]);
+        const SHIP_MOVES_OFFSETS = [
+            [-1, -1],
+            [-1, 0],
+            [-1, 1],
+            [0, -1],
+            [0, 1],
+            [1, -1],
+            [1, 0],
+            [1, 1],
+        ];  
+
+        const allPossibleCoordinates = SHIP_MOVES_OFFSETS.reduce((acc, [x,y]) => {
+
+            for (const coordinate of coordinates) {
+                const separatedCoordinates = coordinate.split(',');
+                const [newX, newY] = separatedCoordinates;
+
+                // Converting string input to number
+                newX = Number(newX);
+                newY = Number(newY);
+
+                // Filtering only valid surrounding coordinates. e.g ship placed in the corner with negative values close
+                if (!this.#isCellValid(x + newX, y + newY) && ['X', '?'].includes(this.getCell(x + newX, y + newY))) continue;
+
+                acc.push([x + newX, y + newY].toString());
+            }
 
             return acc;
         }, []);
 
-        // Filtering only valid surrounding coordinates. e.g ship placed in the corner with negative values close
-        const validSurroundingCoordinates = allPossibleCoordinates.filter(
-            ([x, y]) =>
-                this.#isCoordinatesValid([[x, y]]) && !this.#gameboard[x][y],
-        );
-
         // Removing duplicated coordinates
-        const set = new Set();
-        validSurroundingCoordinates.forEach((arr) => set.add(arr.toString()));
+        const set = new Set(allPossibleCoordinates);
 
         return [...set];
     }
 
     #isCoordinatesFree = (inputedCoordinates) => {
-        const freeCoordinates = inputedCoordinates.filter(
-            ([x, y]) => !this.#gameboard[x][y] && this.#gameboard[x][y] !== "X",
-        );
+        const freeCoordinates = inputedCoordinates.filter((coordinate) => {
+            const separatedNums = coordinate.split(",");
+            const [x, y] = separatedNums;
+
+            const cell = this.getCell(x,y)
+
+            return cell === '?' && cell !== "X";
+        });
         return freeCoordinates.length === inputedCoordinates.length;
     };
 
-    #isCoordinatesValid(inputedCoordinates) {
-        const validCoordinates = inputedCoordinates.filter(
-            ([x, y]) => x >= 0 && x < this.rows  && y >= 0 && y < this.cols,
-        );
+    #isCoordinatesValid(inputedCoordinates, options = {}) {
+        const validCoordinates = inputedCoordinates.filter((coordinate) => {
+            const separatedNums = coordinate.split(",");
+            const [x, y] = separatedNums;
+
+            return this.#isCellValid(x,y);
+        });
+            
         return validCoordinates.length === inputedCoordinates.length;
+    }
+
+    #isCellValid(x,y) {
+        return x >= 0 && x < this.rows && y >= 0 && y < this.cols;
     }
 }
