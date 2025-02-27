@@ -126,7 +126,7 @@ export default class Gameboard {
 
                 // Filtering only valid surrounding coordinates. e.g ship placed in the corner with negative values close
                 if (!this.#isCellValid(x + newX, y + newY)) continue;
-                // if (!['X', '?'].includes(this.getCell(x + newX, y + newY))) continue;
+                if (!['X', '?'].includes(this.getCell(x + newX, y + newY))) continue;
 
                 acc.push([x + newX, y + newY].toString());
             }
