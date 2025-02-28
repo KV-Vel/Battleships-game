@@ -1,10 +1,11 @@
 import Gameboard from "../../../src/components/Gameboard/gameboard";
 import Ship from "../../../src/components/Ship/ship";
+import ShipRandomizer from "../../../src/components/Randomizer/ShipRandomizer";
 
 let gameboard;
 
 beforeEach(() => {
-    gameboard = new Gameboard(10,10, {});
+    gameboard = new Gameboard(10,10, new ShipRandomizer(10,10));
 });
 
 test("plaseShip values cant be bigger or smaller than the board size", () => {
