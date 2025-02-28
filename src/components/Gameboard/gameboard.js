@@ -1,5 +1,3 @@
-    // @todo placeShipsRandomly(coordinates, shipSize) clear board before this function 
-
 export default class Gameboard {
     #gameboard;
     #ships = {
@@ -7,10 +5,10 @@ export default class Gameboard {
         // here will be placed ship identificator and it's surrounding cells
     };
     
-    constructor(rows, cols) {
+    constructor(rows, cols, randomizer) {
         this.rows = rows;
         this.cols = cols;
-        // this.randomizer = randomizer;
+        this.randomizer = randomizer;
         this.#gameboard = this.#createBoard(this.rows, this.cols);
     }
 
@@ -33,7 +31,7 @@ export default class Gameboard {
         // Will be used to circle ship when it is destroyed or placed
         this.#ships[ship.identificator] = blockedCells;
 
-        return { coordinates, blockedCells };
+        return [ ...coordinates, ...blockedCells ];
     }
 
     placeShipRandomly(ship) {
@@ -41,6 +39,8 @@ export default class Gameboard {
             ship.length,
         );
         const shipCoordinates = this.placeShip(randomCoordinates, ship);
+
+        this.randomizer.deleteCoordinates(shipCoordinates);
     }
 
     receiveAttack(x,y) {
