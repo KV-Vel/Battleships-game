@@ -16,7 +16,9 @@ module.exports = {
         process.env.NODE_ENV === "development"
             ? "eval-source-map"
             : "source-map",
-    devServer: { watchFiles: ".src/template.html" },
+    devServer: {
+        watchFiles: [".src/template.html"],
+    },
     plugins: [
         new HtmlWebpackPlugin({
             template: "./src/template.html",

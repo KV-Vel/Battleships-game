@@ -3,7 +3,8 @@
     "plugins": ["prettier"],
     "parser": "@babel/eslint-parser",
     "env" : {
-        "jest": true
+        "jest": true,
+        "browser": true
     },
     "rules": {
         "prettier/prettier": [
