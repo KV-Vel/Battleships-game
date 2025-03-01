@@ -4,6 +4,7 @@ import ShipRandomizer from "./components/Randomizer/ShipRandomizer";
 import Player from "./components/Player/Player";
 import Gameboard from './components/Gameboard/Gameboard';
 import Ship from './components/Ship/Ship';
+import UI from './components/UI/UI';
 
 const ROWS = 10;
 const COLS = 10;
