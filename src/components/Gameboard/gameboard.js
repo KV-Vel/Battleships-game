@@ -1,10 +1,11 @@
 export default class Gameboard {
     #gameboard;
+
     #ships = {
         shipsOnBoard: 0,
         // here will be placed ship identificator and it's surrounding cells
     };
-    
+
     constructor(rows, cols, randomizer) {
         this.rows = rows;
         this.cols = cols;
@@ -31,7 +32,7 @@ export default class Gameboard {
         // Will be used to circle ship when it is destroyed or placed
         this.#ships[ship.identificator] = blockedCells;
 
-        return [ ...coordinates, ...blockedCells ];
+        return [...coordinates, ...blockedCells];
     }
 
     placeShipRandomly(ship) {
@@ -43,13 +44,13 @@ export default class Gameboard {
         this.randomizer.deleteCoordinates(shipCoordinates);
     }
 
-    receiveAttack(x,y) {
-        if (!this.#isCellValid(x,y)) return; 
+    receiveAttack(x, y) {
+        if (!this.#isCellValid(x, y)) return;
 
-        const cell = this.getCell(x,y);
+        const cell = this.getCell(x, y);
 
-        if (!['?', 'X'].includes(cell)) {
-            const ship = this.getCell(x,y);
+        if (!["?", "X"].includes(cell)) {
+            const ship = this.getCell(x, y);
             ship.hit();
 
             if (ship.isSunk()) {
@@ -66,8 +67,8 @@ export default class Gameboard {
         return this.#ships.shipsOnBoard === 0;
     }
 
-    getCell(x,y) {
-        if (!this.#isCellValid(x,y)) return;
+    getCell(x, y) {
+        if (!this.#isCellValid(x, y)) return;
 
         return this.#gameboard[x][y];
     }
@@ -85,14 +86,14 @@ export default class Gameboard {
     }
 
     #createBoard(rows, cols) {
-        return [...Array(rows)].map(() => Array(cols).fill('?'));
+        return [...Array(rows)].map(() => Array(cols).fill("?"));
     }
 
     #surroundShipWithBlockedCells(shipCoordinates) {
         const cellsSurroundingShip =
             this.#getSurroundingShipCells(shipCoordinates);
         return cellsSurroundingShip.reduce((acc, str) => {
-            //converting to array. After being stored in Set
+            // converting to array. After being stored in Set
             const separatedNums = str.split(",");
             const [x, y] = separatedNums;
 
@@ -112,27 +113,30 @@ export default class Gameboard {
             [1, -1],
             [1, 0],
             [1, 1],
-        ];  
+        ];
 
-        const allPossibleCoordinates = SHIP_MOVES_OFFSETS.reduce((acc, [x,y]) => {
+        const allPossibleCoordinates = SHIP_MOVES_OFFSETS.reduce(
+            (acc, [x, y]) => {
+                coordinates.forEach((coordinate) => {
+                    const separatedCoordinates = coordinate.split(",");
+                    let [newX, newY] = separatedCoordinates;
 
-            for (const coordinate of coordinates) {
-                const separatedCoordinates = coordinate.split(',');
-                let [newX, newY] = separatedCoordinates;
+                    // Converting string input to number
+                    newX = Number(newX);
+                    newY = Number(newY);
 
-                // Converting string input to number
-                newX = Number(newX);
-                newY = Number(newY);
+                    // Filtering only valid surrounding coordinates. e.g ship placed in the corner with negative values close
+                    if (!this.#isCellValid(x + newX, y + newY)) return;
+                    if (!["X", "?"].includes(this.getCell(x + newX, y + newY)))
+                        return;
 
-                // Filtering only valid surrounding coordinates. e.g ship placed in the corner with negative values close
-                if (!this.#isCellValid(x + newX, y + newY)) continue;
-                if (!['X', '?'].includes(this.getCell(x + newX, y + newY))) continue;
+                    acc.push([x + newX, y + newY].toString());
+                });
 
-                acc.push([x + newX, y + newY].toString());
-            }
-
-            return acc;
-        }, []);
+                return acc;
+            },
+            [],
+        );
 
         // Removing duplicated coordinates
         const set = new Set(allPossibleCoordinates);
@@ -145,9 +149,9 @@ export default class Gameboard {
             const separatedNums = coordinate.split(",");
             const [x, y] = separatedNums;
 
-            const cell = this.getCell(x,y)
+            const cell = this.getCell(x, y);
 
-            return cell === '?' && cell !== "X";
+            return cell === "?" && cell !== "X";
         });
         return freeCoordinates.length === inputedCoordinates.length;
     };
@@ -157,13 +161,13 @@ export default class Gameboard {
             const separatedNums = coordinate.split(",");
             const [x, y] = separatedNums;
 
-            return this.#isCellValid(x,y);
+            return this.#isCellValid(x, y);
         });
-            
+
         return validCoordinates.length === inputedCoordinates.length;
     }
 
-    #isCellValid(x,y) {
+    #isCellValid(x, y) {
         return x >= 0 && x < this.rows && y >= 0 && y < this.cols;
     }
 }

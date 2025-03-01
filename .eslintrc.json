@@ -1,8 +1,9 @@
 {
     "extends": ["airbnb-base", "prettier", "plugin:node/recommended"],
     "plugins": ["prettier"],
-    "parseOptions": {
-        "sourceType": "module"
+    "parser": "@babel/eslint-parser",
+    "env" : {
+        "jest": true
     },
     "rules": {
         "prettier/prettier": [

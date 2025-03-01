@@ -22,16 +22,22 @@ test("generating random coordinates function getting called and returns value", 
     jest.restoreAllMocks();
 });
 
-test('deleting coordinates should decrease number of available coordinates', () => {
+test("deleting coordinates should decrease number of available coordinates", () => {
     const randomCoordinate = randomizer.generateRandomCoordinates(4);
-    const initialAvailableCoordinatesLength = randomizer.availableShipPlacements[4].length;
+    const initialAvailableCoordinatesLength =
+        randomizer.availableShipPlacements[4].length;
 
     randomizer.deleteShipPlacements(randomCoordinate);
-    const updatedAvailableCoordinatesLength = randomizer.availableShipPlacements[4].length;
-    expect(updatedAvailableCoordinatesLength).toBeLessThan(initialAvailableCoordinatesLength);
-})
+    const updatedAvailableCoordinatesLength =
+        randomizer.availableShipPlacements[4].length;
+    expect(updatedAvailableCoordinatesLength).toBeLessThan(
+        initialAvailableCoordinatesLength,
+    );
+});
 
-test('deleting coordinates should be an array', () => {
-    expect(randomizer.deleteShipPlacements('1,2')).toBeUndefined();
-    expect(randomizer.deleteShipPlacements({coordinate: ['1,2']})).toBeUndefined();
-})
+test("deleting coordinates should be an array", () => {
+    expect(randomizer.deleteShipPlacements("1,2")).toBeUndefined();
+    expect(
+        randomizer.deleteShipPlacements({ coordinate: ["1,2"] }),
+    ).toBeUndefined();
+});

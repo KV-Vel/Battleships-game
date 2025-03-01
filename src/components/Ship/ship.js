@@ -1,5 +1,6 @@
 export default class Ship {
     #hitTimes = 0;
+
     #sunk = false;
 
     constructor(length) {
