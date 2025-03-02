@@ -41,7 +41,7 @@ export default class Gameboard {
         );
         const shipCoordinates = this.placeShip(randomCoordinates, ship);
 
-        this.randomizer.deleteCoordinates(shipCoordinates);
+        this.randomizer.deleteShipPlacements(shipCoordinates);
     }
 
     receiveAttack(x, y) {
@@ -68,7 +68,7 @@ export default class Gameboard {
     }
 
     getCell(x, y) {
-        if (!this.#isCellValid(x, y)) return;
+        if (!this.#isCellValid(x, y)) return null;
 
         return this.#gameboard[x][y];
     }
