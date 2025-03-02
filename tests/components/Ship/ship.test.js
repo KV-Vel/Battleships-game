@@ -1,13 +1,13 @@
-import Ship from '../../../src/components/Ship/ship';
+import Ship from "../../../src/components/Ship/Ship";
 
 let ship;
 beforeEach(() => {
     ship = new Ship(3);
 });
 
-test('class methods have been called', () => {
-    const spyOnHit = jest.spyOn(ship, 'hit');
-    const spyOnisSunk = jest.spyOn(ship, 'isSunk');
+test("class methods have been called", () => {
+    const spyOnHit = jest.spyOn(ship, "hit");
+    const spyOnisSunk = jest.spyOn(ship, "isSunk");
 
     ship.hit();
     ship.isSunk();
@@ -16,8 +16,8 @@ test('class methods have been called', () => {
     expect(spyOnisSunk).toHaveBeenCalled();
 });
 
-test('hitTimes variable updates', () => {
-    const spyOnGetter = jest.spyOn(ship, 'hitTimes', 'get');
+test("hitTimes variable updates", () => {
+    const spyOnGetter = jest.spyOn(ship, "hitTimes", "get");
 
     ship.hit();
     ship.hit();
@@ -27,7 +27,7 @@ test('hitTimes variable updates', () => {
     expect(ship.hitTimes).toEqual(2);
 });
 
-test('isSunk returns correct value according to the times ship is been hit', () => {
+test("isSunk returns correct value according to the times ship is been hit", () => {
     ship.hit();
     ship.hit();
 
