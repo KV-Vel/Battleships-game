@@ -7,10 +7,6 @@ body {
     align-items: center;
 }
 
-main {
-    background-color: rosybrown;
-}
-
 .board__wrapper__row {
     display: flex;
 }
@@ -19,4 +15,6 @@ main {
     border: 1px solid black;
     min-width: 40px;
     min-height: 40px;
+    background-color: rosybrown;
+    border-radius: 5px;
 }
