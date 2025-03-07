@@ -5,7 +5,9 @@ export default class BoardUI {
         boardCell: "board__cell",
     };
 
-    constructor() {}
+    constructor(boardToPlaceTo) {
+        this.boardToPlaceTo = boardToPlaceTo;
+    }
 
     onClick(e) {
         const { target } = e;
@@ -39,18 +41,13 @@ export default class BoardUI {
     }
 
     createBoard(playerBoard) {
-        const boardWrapper = this.createBoardWrapper(
-            this.selectorsNames.boardRoot,
-        );
+        const boardWrapper = this.createBoardWrapper(this.selectorsNames.boardRoot);
 
         playerBoard.forEach((row, rowIndex) => {
-            const boardRow = this.createBoardRow("board__wrapper__row");
+            const boardRow = this.createBoardRow(this.selectorsNames.boardRow);
 
             row.forEach((cell, cellIndex) => {
-                const boardCell = this.createBoardCell(
-                    "board__cell",
-                    `${rowIndex},${cellIndex}`,
-                );
+                const boardCell = this.createBoardCell(this.selectorsNames.boardCell, `${rowIndex},${cellIndex}`);
 
                 boardRow.append(boardCell);
             });
@@ -58,6 +55,13 @@ export default class BoardUI {
             boardWrapper.append(boardRow);
         });
 
-        return boardWrapper;
+        this.boardToPlaceTo.append(boardWrapper);
+    }
+
+    createAndDisplayShip(coordinates) {
+        coordinates.forEach(coordinate => {
+            const uiCell = document.querySelector(`[data-coordinate = '${coordinate}']`);
+            uiCell.classList.add("ship");
+        });
     }
 }
