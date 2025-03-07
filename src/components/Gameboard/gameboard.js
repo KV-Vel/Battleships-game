@@ -15,11 +15,11 @@ export default class Gameboard {
 
     placeShip(coordinates, ship) {
         if (coordinates.length !== ship.length) return false;
-        // If not overflowing map
+        // If not overflowing map CHANGE VARIABLE NAME
         if (!this.#isCoordinatesValid(coordinates)) return false;
         if (!this.#isCoordinatesFree(coordinates)) return false;
 
-        coordinates.forEach((coordinate) => {
+        coordinates.forEach(coordinate => {
             const separatedNums = coordinate.split(",");
             const [x, y] = separatedNums;
 
@@ -30,18 +30,22 @@ export default class Gameboard {
 
         const blockedCells = this.#surroundShipWithBlockedCells(coordinates);
         // Will be used to circle ship when it is destroyed or placed
-        this.#ships[ship.identificator] = blockedCells;
-
-        return [...coordinates, ...blockedCells];
+        this.#ships[ship.identificator] = {
+            blockedCells,
+            shipCoordinates: coordinates,
+        };
+        return [coordinates, blockedCells];
     }
 
     placeShipRandomly(ship) {
-        const randomCoordinates = this.randomizer.generateRandomCoordinates(
-            ship.length,
-        );
+        if (!this.randomizer) return "Randomizer is not located";
+
+        const randomCoordinates = this.randomizer.generateRandomCoordinates(ship.length);
         const shipCoordinates = this.placeShip(randomCoordinates, ship);
 
         this.randomizer.deleteShipPlacements(shipCoordinates);
+
+        return shipCoordinates;
     }
 
     receiveAttack(x, y) {
@@ -90,8 +94,7 @@ export default class Gameboard {
     }
 
     #surroundShipWithBlockedCells(shipCoordinates) {
-        const cellsSurroundingShip =
-            this.#getSurroundingShipCells(shipCoordinates);
+        const cellsSurroundingShip = this.#getSurroundingShipCells(shipCoordinates);
         return cellsSurroundingShip.reduce((acc, str) => {
             // converting to array. After being stored in Set
             const separatedNums = str.split(",");
@@ -115,28 +118,24 @@ export default class Gameboard {
             [1, 1],
         ];
 
-        const allPossibleCoordinates = SHIP_MOVES_OFFSETS.reduce(
-            (acc, [x, y]) => {
-                coordinates.forEach((coordinate) => {
-                    const separatedCoordinates = coordinate.split(",");
-                    let [newX, newY] = separatedCoordinates;
+        const allPossibleCoordinates = SHIP_MOVES_OFFSETS.reduce((acc, [x, y]) => {
+            coordinates.forEach(coordinate => {
+                const separatedCoordinates = coordinate.split(",");
+                let [newX, newY] = separatedCoordinates;
 
-                    // Converting string input to number
-                    newX = Number(newX);
-                    newY = Number(newY);
+                // Converting string input to number
+                newX = Number(newX);
+                newY = Number(newY);
 
-                    // Filtering only valid surrounding coordinates. e.g ship placed in the corner with negative values close
-                    if (!this.#isCellValid(x + newX, y + newY)) return;
-                    if (!["X", "?"].includes(this.getCell(x + newX, y + newY)))
-                        return;
+                // Filtering only valid surrounding coordinates. e.g ship placed in the corner with negative values close
+                if (!this.#isCellValid(x + newX, y + newY)) return;
+                if (!["X", "?"].includes(this.getCell(x + newX, y + newY))) return;
 
-                    acc.push([x + newX, y + newY].toString());
-                });
+                acc.push([x + newX, y + newY].toString());
+            });
 
-                return acc;
-            },
-            [],
-        );
+            return acc;
+        }, []);
 
         // Removing duplicated coordinates
         const set = new Set(allPossibleCoordinates);
@@ -144,8 +143,8 @@ export default class Gameboard {
         return [...set];
     }
 
-    #isCoordinatesFree = (inputedCoordinates) => {
-        const freeCoordinates = inputedCoordinates.filter((coordinate) => {
+    #isCoordinatesFree = inputedCoordinates => {
+        const freeCoordinates = inputedCoordinates.filter(coordinate => {
             const separatedNums = coordinate.split(",");
             const [x, y] = separatedNums;
 
@@ -157,7 +156,7 @@ export default class Gameboard {
     };
 
     #isCoordinatesValid(inputedCoordinates) {
-        const validCoordinates = inputedCoordinates.filter((coordinate) => {
+        const validCoordinates = inputedCoordinates.filter(coordinate => {
             const separatedNums = coordinate.split(",");
             const [x, y] = separatedNums;
 
