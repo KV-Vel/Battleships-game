@@ -4,7 +4,7 @@ export default class Ship {
     #sunk = false;
 
     constructor(length) {
-        this.length = length;
+        this.length = Number(length);
         this.identificator = new Date().getTime().toString();
     }
 
