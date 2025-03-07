@@ -15,16 +15,14 @@ export default class ShipRandomizer {
     deleteShipPlacements(deletingCoordinates) {
         if (!(deletingCoordinates instanceof Array)) return;
 
-        const availableCoordinatesEntries = Object.entries(
-            this.availableShipPlacements,
-        );
+        // deletingCoordinates include shipPlacement and cells around the ship
+        const joinedDeletingCoordinates = deletingCoordinates.flat();
+        const availableCoordinatesEntries = Object.entries(this.availableShipPlacements);
 
         for (const [length, coordinate] of availableCoordinatesEntries) {
             // deleting used coordinates
-            const updatedCoordinates = coordinate.filter((arr) =>
-                arr.some((value) => !deletingCoordinates.includes(value)),
-            );
-            this.availableShipPlacements[length] = updatedCoordinates;
+            const unusedCoordinates = coordinate.filter(arr => !arr.some(value => joinedDeletingCoordinates.includes(value)));
+            this.availableShipPlacements[length] = unusedCoordinates;
         }
     }
 
@@ -44,32 +42,18 @@ export default class ShipRandomizer {
     #fillRandomShipPlacements(boardCols, boardRows) {
         for (let i = 0; i < boardCols; i += 1) {
             for (let j = 0; j < boardRows; j += 1) {
-                const allCoordinates = this.#traverseAllPossibleCoordinates(
-                    i,
-                    j,
-                );
+                const allCoordinates = this.#traverseAllPossibleCoordinates(i, j);
 
-                const validRows = allCoordinates.rows.filter((row) =>
-                    this.#isCoordinatesValid(row),
-                );
-                const validCols = allCoordinates.cols.filter((col) =>
-                    this.#isCoordinatesValid(col),
-                );
+                const validRows = allCoordinates.rows.filter(row => this.#isCoordinatesValid(row));
+                const validCols = allCoordinates.cols.filter(col => this.#isCoordinatesValid(col));
 
                 const validCoordinates = [...validRows, ...validCols];
 
                 // Filling up availableShipPlacements object
-                validCoordinates.forEach((coordinate) => {
+                validCoordinates.forEach(coordinate => {
                     const shipLength = coordinate.length;
-
-                    const coordinatesToStr = coordinate.reduce(
-                        (acc, el) => [...acc, el.toString()],
-                        [],
-                    );
-
-                    this.availableShipPlacements[shipLength].push(
-                        coordinatesToStr,
-                    );
+                    const coordinatesToStr = coordinate.reduce((acc, el) => [...acc, el.toString()], []);
+                    this.availableShipPlacements[shipLength].push(coordinatesToStr);
                 });
             }
         }
@@ -97,9 +81,7 @@ export default class ShipRandomizer {
     }
 
     #isCoordinatesValid(inputedCoordinates) {
-        const validCoordinates = inputedCoordinates.filter(
-            ([x, y]) => x >= 0 && x < this.rows && y >= 0 && y < this.cols,
-        );
+        const validCoordinates = inputedCoordinates.filter(([x, y]) => x >= 0 && x < this.rows && y >= 0 && y < this.cols);
         return validCoordinates.length === inputedCoordinates.length;
     }
 }
