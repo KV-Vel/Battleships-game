@@ -1,5 +1,5 @@
-import Ship from "../Ship/Ship";
-
+/* eslint-disable no-param-reassign */
+/* eslint-disable no-useless-return */
 export default class Battleship {
     #defaultSettings = {
         initialShipsQuantity: new Map([
@@ -10,69 +10,69 @@ export default class Battleship {
         ]),
     };
 
-    constructor(player1, player2, ui) {
+    #statuses = {
+        activePlayer: null,
+        inActivePlayer: null,
+    };
+
+    constructor(player1, player2) {
         this.player1 = player1;
         this.player2 = player2;
-        this.ui = ui;
         this.#init();
     }
 
     startGame() {
-        if (!this.#canStartGame) return;
+        this.#statuses.activePlayer = this.player1;
+        this.#statuses.inActivePlayer = this.player2;
+    }
 
-        this.player1.statuses.takingTurn = true; // change this to BE CALLED FROM PLAYER INSTANCE
+    playerMakesMove(coordinates) {
+        // coordinates are str type — "2,3"
+        const [x, y] = coordinates.split(",");
+        const { activePlayer, inActivePlayer } = this.#statuses;
+
+        inActivePlayer.gameboard.receiveAttack(x, y);
+        if (inActivePlayer.gameboard.isAllShipsSunk()) {
+            return `${activePlayer.name} is a Winner!`;
+        }
+
+        this.#decideTurn();
+    }
+
+    playerPlacesShip() {}
+
+    // Заменить на один метод, но сделать проверку по типу? type active inactive
+    getActivePlayer() {
+        return this.#statuses.activePlayer;
+    }
+
+    getInactivePlayer() {
+        return this.#statuses.inActivePlayer;
     }
 
     #init() {
-        // Setting ships quantity
-        this.player1.shipsQuantity = this.#defaultSettings.initialShipsQuantity;
-        this.player2.shipsQuantity = this.#defaultSettings.initialShipsQuantity;
+        // // Setting ships quantity
+        // this.player1.shipsQuantity = this.#defaultSettings.initialShipsQuantity;
+        // this.player2.shipsQuantity = this.#defaultSettings.initialShipsQuantity;
 
-        // // Creating boards
-        const board1 = this.ui.createBoard(this.player1.gameboard.gameboard);
-        const board2 = this.ui.createBoard(this.player2.gameboard.gameboard);
+        // // FOR TEST PURPOSES PLACING SHIPS RANDOMLY
+        // this.player1.gameboard.placeShipsRandomly(this.player1.shipsQuantity);
+        // this.player2.gameboard.placeShipsRandomly(this.player2.shipsQuantity);
 
-        // MOVE TO SEPARTE METHOD
-        const btn = document.querySelector("button");
-        btn.addEventListener("click", () => {
-            this.onRandomlyPlacedShip();
-        });
-    }
-
-    #canStartGame() {
-        return this.player1.statuses.readyToStart && this.player2.statuses.readyToStart;
-    }
-
-    onSelectedPlacedShip() {}
-
-    getActivePlayer() {
-       
-    }
-
-    onRandomlyPlacedShip() {
-        // const activePlayer = this.getActivePlayer();
-        // forEach do not preserve order in Map. First random ship should be the biggest one.
-        for (const [shipSize, numberOfShips] of this.player1.shipsQuantity) {
-            for (let i = numberOfShips; i >= 1; i -= 1) {    
-                const [shipCoordinates, blockedCells] =  this.player1.gameboard.placeShipRandomly(new Ship(shipSize));
-                this.ui.createAndDisplayShip(shipCoordinates);
-                // this.ui.blockCells(blockedCells)
-
-            }
+        if (this.#canStartGame) {
+            this.startGame();
         }
     }
 
-    // addShip(coordinates, player, shipSize) {
-    //     // DOM COORDINATES, GETACTIVEPLAYER(), SHIPSIZE
-    //     player.gameboard.placeShip(coordinates, new Ship(shipSize));
+    #canStartGame() {
+        // return this.player1.statuses.readyToStart && this.player2.statuses.readyToStart;
+        return true;
+    }
 
-    //     this.ui.createAndDisplayShip(coordinates);
-    // }
+    #decideTurn() {
+        const { activePlayer, inActivePlayer } = this.#statuses;
 
-    // addRandomShip(player) {
-    //     player.gameboard.placeShipsRandomly();
-    //     // Уменьшать кол-во кораблей после вставки
-    // }
-
-    decideTurn() {}
+        this.#statuses.activePlayer = inActivePlayer;
+        this.#statuses.inActivePlayer = activePlayer;
+    }
 }

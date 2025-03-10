@@ -6,10 +6,9 @@ export default class Gameboard {
         // here will be placed ship identificator and it's surrounding cells
     };
 
-    constructor(rows, cols, randomizer) {
+    constructor(rows, cols) {
         this.rows = rows;
         this.cols = cols;
-        this.randomizer = randomizer;
         this.#gameboard = this.#createBoard(this.rows, this.cols);
     }
 
@@ -37,16 +36,16 @@ export default class Gameboard {
         return [coordinates, blockedCells];
     }
 
-    placeShipRandomly(ship) {
-        if (!this.randomizer) return "Randomizer is not located";
+    // placeShipsRandomly(ship) {
+    //     if (!this.randomizer) return "Randomizer is not located";
 
-        const randomCoordinates = this.randomizer.generateRandomCoordinates(ship.length);
-        const shipCoordinates = this.placeShip(randomCoordinates, ship);
+    //     const randomCoordinates = this.randomizer.generateRandomCoordinates(ship.length);
+    //     const shipCoordinates = this.placeShip(randomCoordinates, ship);
 
-        this.randomizer.deleteShipPlacements(shipCoordinates);
+    //     this.randomizer.deleteShipPlacements(shipCoordinates); // MOVE TO RANDOMIZER
 
-        return shipCoordinates;
-    }
+    //     return shipCoordinates;
+    // }
 
     receiveAttack(x, y) {
         if (!this.#isCellValid(x, y)) return;
