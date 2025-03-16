@@ -1,3 +1,5 @@
+import pubsub from "../../utils/PubSub";
+
 export default class BoardUI {
     selectorsNames = {
         boardRoot: "board__wrapper",
@@ -7,20 +9,16 @@ export default class BoardUI {
 
     constructor(boardToPlaceTo) {
         this.boardToPlaceTo = boardToPlaceTo;
+        // const randomBtn = document.querySelector(".random-ship-placement");
+        // randomBtn.addEventListener('click', () => {
+        //     pubsub.publish('add');
+        // })
     }
 
-    onClick(e) {
-        const { target } = e;
-
-        if (target.matches(".board__cell")) {
-            console.log(target.getAttribute("data-coordinate"));
-        }
-    }
-
-    createBoardWrapper(className) {
+    createBoardWrapper(className, name) {
         const boardWrapperEl = document.createElement("div");
         boardWrapperEl.className = className;
-        boardWrapperEl.addEventListener("click", (e) => this.onClick(e));
+        boardWrapperEl.setAttribute("data-belonging", name);
 
         return boardWrapperEl;
     }
@@ -40,28 +38,36 @@ export default class BoardUI {
         return cellEl;
     }
 
-    createBoard(playerBoard) {
-        const boardWrapper = this.createBoardWrapper(this.selectorsNames.boardRoot);
+    createBoard(rows, cols, playerName) {
+        const boardWrapper = this.createBoardWrapper(this.selectorsNames.boardRoot, playerName);
 
-        playerBoard.forEach((row, rowIndex) => {
+        for (let row = 0; row <= rows - 1; row += 1) {
             const boardRow = this.createBoardRow(this.selectorsNames.boardRow);
 
-            row.forEach((cell, cellIndex) => {
-                const boardCell = this.createBoardCell(this.selectorsNames.boardCell, `${rowIndex},${cellIndex}`);
+            for (let col = 0; col <= cols - 1; col += 1) {
+                const boardCell = this.createBoardCell(this.selectorsNames.boardCell, `${row},${col}`);
 
                 boardRow.append(boardCell);
-            });
-
+            }
             boardWrapper.append(boardRow);
-        });
+        }
 
         this.boardToPlaceTo.append(boardWrapper);
     }
 
-    createAndDisplayShip(coordinates) {
+    displayShip(data) {
+        const [coordinates, name] = data;
+        const playersBoard = document.querySelector(`[data-belonging = ${name}]`);
         coordinates.forEach(coordinate => {
-            const uiCell = document.querySelector(`[data-coordinate = '${coordinate}']`);
+            const uiCell = playersBoard.querySelector(`[data-coordinate = '${coordinate}']`);
             uiCell.classList.add("ship");
         });
+    }
+
+    displayAttackResult(data) {
+        const { coordinates, playerReceivingHitName, hitResult } = data;
+        const playersBoard = document.querySelector(`[data-belonging = ${playerReceivingHitName}]`);
+        const uiCell = playersBoard.querySelector(`[data-coordinate = '${coordinates}']`);
+        uiCell.classList.add(hitResult);
     }
 }
