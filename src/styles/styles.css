@@ -26,15 +26,30 @@ main {
     transform-style: preserve-3d;
 }
 
-.board__wrapper__row:nth-child(even) > .board__cell:nth-child(odd),
-.board__wrapper__row:nth-child(odd) > .board__cell:nth-child(even) {
+/* divide style application and use :where to lower css specifity */
+.board__wrapper__row:where(:nth-child(even)) > .board__cell:where(:nth-child(odd)) {
+    background-color: rgb(30, 128, 170);
+}
+.board__wrapper__row:where(:nth-child(odd)) > .board__cell:where(:nth-child(even)) {
     background-color: rgb(30, 128, 170);
 }
 
-.board__wrapper__row:nth-child(even) > .board__cell:nth-child(even),
-.board__wrapper__row:nth-child(odd) > .board__cell:nth-child(odd) {
+.board__wrapper__row:where(:nth-child(even)) > .board__cell:where(:nth-child(even)) {
     background-color: rgb(125, 204, 236);
 }
+
+.board__wrapper__row:where(:nth-child(odd)) > .board__cell:where(:nth-child(odd)) {
+    background-color: rgb(125, 204, 236);
+}
+/* .board__wrapper__row:nth-child(even) > .board__cell:nth-child(odd),
+.board__wrapper__row:nth-child(odd) > .board__cell:nth-child(even) {
+    background-color: rgb(30, 128, 170);
+} */
+
+/* .board__wrapper__row:nth-child(even) > .board__cell:nth-child(even),
+.board__wrapper__row:nth-child(odd) > .board__cell:nth-child(odd) {
+    background-color: rgb(125, 204, 236);
+} */
 
 
  .board__wrapper__row {
@@ -100,14 +115,13 @@ main {
     background-color: rgb(15, 103, 255) !important;
 }
 
-/* .board__cell:first-child.ship {
+.board__cell.miss {
     background-color: lightgreen !important;
 }
- 
-
-.board__cell:nth-child(2).ship {
+ /* using board__wrapper_row selector and :is to make specifity higher */
+.board__wrapper__row > .board__cell:is(.hit) {
     background-color: rgb(210, 91, 131) !important;
-} */
+}
 
 .board__cell.ship {
     background-color: rgb(198, 198, 198) !important;
