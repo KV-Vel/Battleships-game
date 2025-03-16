@@ -1,15 +1,20 @@
 export default class ShipRandomizer {
-    availableShipPlacements = {
-        4: [],
-        3: [],
-        2: [],
-        1: [],
-    };
-
     constructor(rows, cols) {
         this.rows = rows;
         this.cols = cols;
-        this.#fillRandomShipPlacements(this.cols, this.rows);
+        this.availableShipPlacements = this.#fillRandomShipPlacements(this.cols, this.rows);
+
+        // Copy needed to reset availableShipPlacements to default values, to not make another calculations;
+        this.copy = JSON.parse(JSON.stringify(this.availableShipPlacements));
+    }
+
+    generateRandomCoordinates(shipSize) {
+        // getting array of available coordinates for inputed shipSize
+        const shipAvailableCoordinates = this.availableShipPlacements[shipSize];
+        const maxNumToRandomize = shipAvailableCoordinates.length;
+        const randomNum = this.#getRandomNum(0, maxNumToRandomize);
+
+        return shipAvailableCoordinates[randomNum];
     }
 
     deleteShipPlacements(deletingCoordinates) {
@@ -26,13 +31,10 @@ export default class ShipRandomizer {
         }
     }
 
-    generateRandomCoordinates(shipSize) {
-        // getting array of available coordinates for inputed shipSize
-        const shipAvailableCoordinates = this.availableShipPlacements[shipSize];
-        const maxNumToRandomize = shipAvailableCoordinates.length;
-        const randomNum = this.#getRandomNum(0, maxNumToRandomize);
-
-        return shipAvailableCoordinates[randomNum];
+    resetAvailableCoordinates() {
+        // Rerunning #fillRandomShipPlacements will spike CPU usage. Making deep clone instead
+        // TODO: make better approach and write deleting cells into another object and then join them on reset function
+        this.availableShipPlacements = JSON.parse(JSON.stringify(this.copy));
     }
 
     #getRandomNum(min, max) {
@@ -40,6 +42,13 @@ export default class ShipRandomizer {
     }
 
     #fillRandomShipPlacements(boardCols, boardRows) {
+        const shipPlacements = {
+            4: [],
+            3: [],
+            2: [],
+            1: [],
+        };
+
         for (let i = 0; i < boardCols; i += 1) {
             for (let j = 0; j < boardRows; j += 1) {
                 const allCoordinates = this.#traverseAllPossibleCoordinates(i, j);
@@ -53,10 +62,12 @@ export default class ShipRandomizer {
                 validCoordinates.forEach(coordinate => {
                     const shipLength = coordinate.length;
                     const coordinatesToStr = coordinate.reduce((acc, el) => [...acc, el.toString()], []);
-                    this.availableShipPlacements[shipLength].push(coordinatesToStr);
+                    shipPlacements[shipLength].push(coordinatesToStr);
                 });
             }
         }
+
+        return shipPlacements;
     }
 
     #traverseAllPossibleCoordinates(x, y) {
