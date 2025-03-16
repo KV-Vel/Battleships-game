@@ -1,6 +1,9 @@
 import ShipRandomizer from "../../../src/components/Randomizer/ShipRandomizer";
 
-const randomizer = new ShipRandomizer(10, 10);
+let randomizer;
+beforeEach(() => {
+    randomizer = new ShipRandomizer(10, 10);
+});
 
 test("available ship placements should be filled with value after creating instance of ShipRandomizer", () => {
     expect(randomizer.availableShipPlacements[4].length).toBeGreaterThan(1);
@@ -29,6 +32,23 @@ test("deleting coordinates should decrease number of available coordinates", () 
     randomizer.deleteShipPlacements(randomCoordinate);
     const updatedAvailableCoordinatesLength = randomizer.availableShipPlacements[4].length;
     expect(updatedAvailableCoordinatesLength).toBeLessThan(initialAvailableCoordinatesLength);
+});
+
+test("reset function should reset randomizer to initial state", () => {
+    const randomCoordinate = randomizer.generateRandomCoordinates(4);
+    randomizer.deleteShipPlacements(randomCoordinate);
+
+    const anotherRandomCoordinates = randomizer.generateRandomCoordinates(3);
+    randomizer.deleteShipPlacements(anotherRandomCoordinates);
+
+    randomizer.resetAvailableCoordinates();
+    expect(randomizer.availableShipPlacements["1"]).toHaveLength(200);
+
+    const thirdRandomCoordinates = randomizer.generateRandomCoordinates(1);
+    randomizer.deleteShipPlacements(thirdRandomCoordinates);
+
+    randomizer.resetAvailableCoordinates();
+    expect(randomizer.availableShipPlacements["1"]).toHaveLength(200);
 });
 
 test("deleting coordinates should be an array", () => {

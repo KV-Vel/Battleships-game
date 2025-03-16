@@ -1,4 +1,4 @@
-import Gameboard from "../../../src/components/Gameboard/gameboard";
+import Gameboard from "../../../src/components/Gameboard/Gameboard";
 import Ship from "../../../src/components/Ship/ship";
 import ShipRandomizer from "../../../src/components/Randomizer/ShipRandomizer";
 
@@ -123,4 +123,4 @@ test("not sorted coordinates should also be a valid input", () => {
     expect(gameboard.getCell(3, 3)).toBeInstanceOf(Object);
 });
 
-test.skip("randomly place function should place all ships in free cells", () => {});
+test.skip("placing ships when their number is equal to 0 should return false", () => {});
