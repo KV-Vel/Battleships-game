@@ -36,17 +36,6 @@ export default class Gameboard {
         return [coordinates, blockedCells];
     }
 
-    // placeShipsRandomly(ship) {
-    //     if (!this.randomizer) return "Randomizer is not located";
-
-    //     const randomCoordinates = this.randomizer.generateRandomCoordinates(ship.length);
-    //     const shipCoordinates = this.placeShip(randomCoordinates, ship);
-
-    //     this.randomizer.deleteShipPlacements(shipCoordinates); // MOVE TO RANDOMIZER
-
-    //     return shipCoordinates;
-    // }
-
     receiveAttack(x, y) {
         if (!this.#isCellValid(x, y)) return;
 
@@ -55,15 +44,16 @@ export default class Gameboard {
         if (!["?", "X"].includes(cell)) {
             const ship = this.getCell(x, y);
             ship.hit();
-
             if (ship.isSunk()) {
                 this.#ships.shipsOnBoard -= 1;
                 // this.#ships[ship.identificator];
             }
+            // after hitting one piece of Ship or not hitting, cell becomes unavailable
+            this.#gameboard[x][y] = "X";
+            return "hit";
         }
 
-        // after hitting one piece of Ship or not hitting, cell becomes unavailable
-        this.#gameboard[x][y] = "X";
+        return "miss";
     }
 
     isAllShipsSunk() {
