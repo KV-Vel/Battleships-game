@@ -1,78 +1,111 @@
+/* eslint-disable consistent-return */
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-useless-return */
+
+import pubsub from "../../utils/PubSub";
+
 export default class Battleship {
     #defaultSettings = {
-        initialShipsQuantity: new Map([
+        initialShipsQuantity: [
             ["4", 1],
             ["3", 2],
             ["2", 3],
             ["1", 4],
-        ]),
+        ],
     };
 
-    #statuses = {
-        activePlayer: null,
-        inActivePlayer: null,
-    };
+    #statuses = {};
 
-    constructor(player1, player2) {
+    constructor(player1, player2, randomizer) {
         this.player1 = player1;
         this.player2 = player2;
+        this.randomizer = randomizer;
         this.#init();
     }
 
     startGame() {
         this.#statuses.activePlayer = this.player1;
-        this.#statuses.inActivePlayer = this.player2;
+        this.#statuses.inactivePlayer = this.player2;
     }
 
-    playerMakesMove(coordinates) {
-        // coordinates are str type — "2,3"
-        const [x, y] = coordinates.split(",");
-        const { activePlayer, inActivePlayer } = this.#statuses;
+    playRound(coordinates) {
+        if (this.isGameEnded()) return;
+        const { hitResult } = this.#playerAttacks(coordinates);
+        const { activePlayer, inactivePlayer } = this.#statuses;
 
-        inActivePlayer.gameboard.receiveAttack(x, y);
-        if (inActivePlayer.gameboard.isAllShipsSunk()) {
-            return `${activePlayer.name} is a Winner!`;
+        if (inactivePlayer.gameboard.isAllShipsSunk()) {
+            this.#statuses.isMatchEnded = true;
+            return `${activePlayer.name} won!`;
         }
-
-        this.#decideTurn();
+        if (hitResult === "miss") this.#decideTurn();
     }
 
-    playerPlacesShip() {}
-
-    // Заменить на один метод, но сделать проверку по типу? type active inactive
     getActivePlayer() {
         return this.#statuses.activePlayer;
     }
 
     getInactivePlayer() {
-        return this.#statuses.inActivePlayer;
+        return this.#statuses.inactivePlayer;
+    }
+
+    isGameEnded() {
+        return this.#statuses.isMatchEnded;
+    }
+
+    playerPlacesShip(coordinates, size) {
+        const activePlayer = this.getActivePlayer();
+        activePlayer.addShipToBoard(coordinates, size);
+    }
+
+    playerPlacesShipsRandomly() {
+        const activePlayer = this.getActivePlayer();
+
+        if (!this.randomizer) return "Can't place ship randomly if randomizer undefined";
+        // eslint-disable-next-line no-restricted-syntax
+        for (const [shipSize, numberOfShips] of activePlayer.shipsQuantity) {
+            for (let i = 0; i !== numberOfShips; i += 1) {
+                const randomCoordinates = this.randomizer.generateRandomCoordinates(shipSize);
+                const shipCoordinates = activePlayer.addShipToBoard(randomCoordinates, shipSize);
+                pubsub.publish("randomlyAdd", [randomCoordinates, activePlayer.name]);
+                this.randomizer.deleteShipPlacements(shipCoordinates);
+            }
+        }
+        this.randomizer.resetAvailableCoordinates();
+        this.#decideTurn();
+    }
+
+    #playerAttacks(coordinates) {
+        // coordinates are str type — "2,3"
+        const [x, y] = coordinates.split(",");
+
+        const inactivePlayer = this.getInactivePlayer();
+        const hitResult = inactivePlayer.gameboard.receiveAttack(x, y);
+
+        pubsub.publish("attack", { coordinates: coordinates, playerReceivingHitName: inactivePlayer.name, hitResult });
+
+        return { coordinates: coordinates, playerReceivingHitName: inactivePlayer.name, hitResult };
     }
 
     #init() {
         // // Setting ships quantity
-        // this.player1.shipsQuantity = this.#defaultSettings.initialShipsQuantity;
-        // this.player2.shipsQuantity = this.#defaultSettings.initialShipsQuantity;
-
-        // // FOR TEST PURPOSES PLACING SHIPS RANDOMLY
-        // this.player1.gameboard.placeShipsRandomly(this.player1.shipsQuantity);
-        // this.player2.gameboard.placeShipsRandomly(this.player2.shipsQuantity);
-
-        if (this.#canStartGame) {
-            this.startGame();
-        }
-    }
-
-    #canStartGame() {
-        // return this.player1.statuses.readyToStart && this.player2.statuses.readyToStart;
-        return true;
+        this.#initiateShips();
+        this.#statuses = {
+            activePlayer: null,
+            inactivePlayer: null,
+            isMatchEnded: false,
+        };
+        this.startGame();
     }
 
     #decideTurn() {
-        const { activePlayer, inActivePlayer } = this.#statuses;
+        const { activePlayer, inactivePlayer } = this.#statuses;
 
-        this.#statuses.activePlayer = inActivePlayer;
-        this.#statuses.inActivePlayer = activePlayer;
+        this.#statuses.activePlayer = inactivePlayer;
+        this.#statuses.inactivePlayer = activePlayer;
+    }
+
+    #initiateShips() {
+        this.player1.shipsQuantity = new Map(this.#defaultSettings.initialShipsQuantity);
+        this.player2.shipsQuantity = new Map(this.#defaultSettings.initialShipsQuantity);
     }
 }

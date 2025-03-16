@@ -2,7 +2,7 @@ import Ship from "../Ship/Ship";
 
 export default class Player {
     // takes instanceof Map object
-    #shipsQuantity;
+    shipsQuantity;
 
     #statuses = {
         readyToStart: false,
@@ -13,31 +13,21 @@ export default class Player {
         this.gameboard = gameboard;
     }
 
-    addShip(coordinates, size) {
-        this.gameboard.placeShip(coordinates, new Ship(size));
-        this.#reduceShipsQuantity(size);
-        this.#isPlayerReady();
+    addShipToBoard(coordinates, size) {
+        const shipCoordinates = this.gameboard.placeShip(coordinates, new Ship(size));
+        this.#reduceShipsByOne(size);
+
+        return shipCoordinates;
     }
 
-    // Will receive ships quantity from outside. Player should know how much ships does he have...
-    setShipsQuantity(shipsQuantity) {
-        if (!(shipsQuantity instanceof Map)) throw new Error("Object is not type of Map");
-        this.#shipsQuantity = shipsQuantity;
+    #reduceShipsByOne(size) {
+        const initialValue = this.shipsQuantity.get(size);
+        this.shipsQuantity.set(size, initialValue - 1);
     }
 
-    // If will be more statuses, provide argument to make it reusable
-    getReadyStatus() {
-        return this.#statuses.readyToStart;
-    }
-
-    #reduceShipsQuantity(size) {
-        const initialValue = this.#shipsQuantity.get(size);
-        this.#shipsQuantity.set(size, initialValue - 1);
-    }
-
-    #isPlayerReady() {
+    isReady() {
         // Getting ship quantities of every ship
-        const shipNumbers = [...this.#shipsQuantity.values()];
+        const shipNumbers = [...this.shipsQuantity.values()];
         const isEveryShipPlaced = shipNumbers.every(ship => ship === 0);
 
         if (isEveryShipPlaced) this.#statuses.readyToStart = true;
