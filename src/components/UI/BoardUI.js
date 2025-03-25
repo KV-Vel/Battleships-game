@@ -1,7 +1,7 @@
 import pubsub from "../../utils/PubSub";
 
 export default class BoardUI {
-    selectorsNames = {
+    boardSelectorsNames = {
         boardRoot: "board__wrapper",
         boardRow: "board__wrapper__row",
         boardCell: "board__cell",
@@ -9,10 +9,6 @@ export default class BoardUI {
 
     constructor(boardToPlaceTo) {
         this.boardToPlaceTo = boardToPlaceTo;
-        // const randomBtn = document.querySelector(".random-ship-placement");
-        // randomBtn.addEventListener('click', () => {
-        //     pubsub.publish('add');
-        // })
     }
 
     createBoardWrapper(className, name) {
@@ -39,13 +35,13 @@ export default class BoardUI {
     }
 
     createBoard(rows, cols, playerName) {
-        const boardWrapper = this.createBoardWrapper(this.selectorsNames.boardRoot, playerName);
+        const boardWrapper = this.createBoardWrapper(this.boardSelectorsNames.boardRoot, playerName);
 
         for (let row = 0; row <= rows - 1; row += 1) {
-            const boardRow = this.createBoardRow(this.selectorsNames.boardRow);
+            const boardRow = this.createBoardRow(this.boardSelectorsNames.boardRow);
 
             for (let col = 0; col <= cols - 1; col += 1) {
-                const boardCell = this.createBoardCell(this.selectorsNames.boardCell, `${row},${col}`);
+                const boardCell = this.createBoardCell(this.boardSelectorsNames.boardCell, `${row},${col}`);
 
                 boardRow.append(boardCell);
             }
@@ -69,5 +65,11 @@ export default class BoardUI {
         const playersBoard = document.querySelector(`[data-belonging = ${playerReceivingHitName}]`);
         const uiCell = playersBoard.querySelector(`[data-coordinate = '${coordinates}']`);
         uiCell.classList.add(hitResult);
+    }
+
+    toggleReadyBtn() {
+        const readyBtn = document.querySelector(".ready-state-btn");
+
+        readyBtn.disabled ? (readyBtn.disabled = false) : (readyBtn.disabled = true);
     }
 }
