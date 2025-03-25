@@ -16,24 +16,28 @@ test("class methods have been called", () => {
     expect(spyOnisSunk).toHaveBeenCalled();
 });
 
-test("hitTimes variable updates", () => {
-    const spyOnGetter = jest.spyOn(ship, "hitTimes", "get");
+describe("hit function", () => {
+    test("hitTimes variable updates", () => {
+        const spyOnGetter = jest.spyOn(ship, "hitTimes", "get");
 
-    ship.hit();
-    ship.hit();
-    ship.hitTimes;
+        ship.hit();
+        ship.hit();
+        ship.hitTimes;
 
-    expect(spyOnGetter).toHaveBeenCalled();
-    expect(ship.hitTimes).toEqual(2);
+        expect(spyOnGetter).toHaveBeenCalled();
+        expect(ship.hitTimes).toEqual(2);
+    });
 });
 
-test("isSunk returns correct value according to the times ship is been hit", () => {
-    ship.hit();
-    ship.hit();
+describe("isSunk function", () => {
+    test("isSunk returns correct value according to the times ship is been hit", () => {
+        ship.hit();
+        ship.hit();
 
-    expect(ship.isSunk()).toBe(false);
+        expect(ship.isSunk()).toBe(false);
 
-    ship.hit();
+        ship.hit();
 
-    expect(ship.isSunk()).toBe(true);
+        expect(ship.isSunk()).toBe(true);
+    });
 });
