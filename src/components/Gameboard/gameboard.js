@@ -1,6 +1,8 @@
 export default class Gameboard {
     #gameboard;
 
+    #attackedCoordinates = [];
+
     #ships = {
         shipsOnBoard: 0,
         // here will be placed ship identificator and it's surrounding cells
@@ -36,13 +38,19 @@ export default class Gameboard {
         return [coordinates, blockedCells];
     }
 
-    receiveAttack(x, y) {
+    receiveAttack(coordinates) {
+        if (!this.#isInputValid(coordinates)) return;
+        const [x, y] = coordinates.split(",");
+
         if (!this.#isCellValid(x, y)) return;
+        if (this.#attackedCoordinates.includes(coordinates)) return;
 
         const cell = this.getCell(x, y);
+        this.#attackedCoordinates.push(coordinates);
 
         if (!["?", "X"].includes(cell)) {
-            const ship = this.getCell(x, y);
+            // If we hit then this cell is a ship
+            const ship = cell;
             ship.hit();
             if (ship.isSunk()) {
                 this.#ships.shipsOnBoard -= 1;
@@ -66,16 +74,17 @@ export default class Gameboard {
         return this.#gameboard[x][y];
     }
 
-    clearBoard() {
-        this.#gameboard = this.#createBoard(this.rows, this.cols);
-    }
-
-    get gameboard() {
+    get myBattleField() {
         return this.#gameboard;
     }
 
     get quantityOfShips() {
         return this.#ships.shipsOnBoard;
+    }
+
+    // UNUSED!
+    #clearBoard() {
+        this.#gameboard = this.#createBoard(this.rows, this.cols);
     }
 
     #createBoard(rows, cols) {
@@ -157,5 +166,10 @@ export default class Gameboard {
 
     #isCellValid(x, y) {
         return x >= 0 && x < this.rows && y >= 0 && y < this.cols;
+    }
+
+    #isInputValid(coordinates) {
+        const coordinatesRegExp = /\d+,\d+/gm;
+        return typeof coordinates === "string" || coordinatesRegExp.test(coordinates);
     }
 }
