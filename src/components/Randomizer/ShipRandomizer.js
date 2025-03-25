@@ -1,3 +1,5 @@
+import getRandomNum from "../../utils/randomNum";
+
 export default class ShipRandomizer {
     constructor(rows, cols) {
         this.rows = rows;
@@ -12,7 +14,7 @@ export default class ShipRandomizer {
         // getting array of available coordinates for inputed shipSize
         const shipAvailableCoordinates = this.availableShipPlacements[shipSize];
         const maxNumToRandomize = shipAvailableCoordinates.length;
-        const randomNum = this.#getRandomNum(0, maxNumToRandomize);
+        const randomNum = getRandomNum(0, maxNumToRandomize);
 
         return shipAvailableCoordinates[randomNum];
     }
@@ -35,10 +37,6 @@ export default class ShipRandomizer {
         // Rerunning #fillRandomShipPlacements will spike CPU usage. Making deep clone instead
         // TODO: make better approach and write deleting cells into another object and then join them on reset function
         this.availableShipPlacements = JSON.parse(JSON.stringify(this.copy));
-    }
-
-    #getRandomNum(min, max) {
-        return Math.floor(Math.random() * (max - min)) + min;
     }
 
     #fillRandomShipPlacements(boardCols, boardRows) {
