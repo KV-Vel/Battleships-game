@@ -124,5 +124,9 @@ main {
 }
 
 .board__cell.ship {
-    background-color: rgb(198, 198, 198) !important;
+    background-color: rgb(198, 198, 198);
+}
+
+button:disabled {
+    cursor: auto;
 }
