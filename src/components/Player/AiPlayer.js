@@ -32,5 +32,3 @@ export default class AI extends Player {
         this.#guesses = this.#guesses.filter(coordinate => coordinate !== input);
     }
 }
-
-// Possibly put place ship random here in player?
