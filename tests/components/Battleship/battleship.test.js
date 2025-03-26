@@ -64,9 +64,32 @@ describe("game flow test", () => {
         game.playRound("0,3");
         expect(game.activePlayer.name).toBe(activePlayerName);
     });
-    
-    test.skip("if all fleet of one player will be destroyed, game will end", () => {
-        // Create new class Settings and pass ships quantity to game? Then I can test it
+
+    test("if all fleet of one player will be destroyed, game will end", () => {
+        game.activePlayer.addShipToBoard(["0,0", "0,1", "0,2", "0,3"], 4);
+        game.checkToStartGame();
+        game.activePlayer.addShipToBoard(["0,0", "0,1", "0,2", "0,3"], 4);
+        game.checkToStartGame();
+
+        game.playRound("0,0");
+        game.playRound("0,1");
+        game.playRound("0,2");
+        game.playRound("0,3");
+
+        expect(game.isGameEnded).toBeTruthy();
     });
-    test.skip("trying to attack cell if game has ended will return", () => {});
+
+    test("trying to attack cell if game has ended will return false", () => {
+        game.activePlayer.addShipToBoard(["0,0", "0,1", "0,2", "0,3"], 4);
+        game.checkToStartGame();
+        game.activePlayer.addShipToBoard(["0,0", "0,1", "0,2", "0,3"], 4);
+        game.checkToStartGame();
+
+        game.playRound("0,0");
+        game.playRound("0,1");
+        game.playRound("0,2");
+        game.playRound("0,3");
+
+        expect(game.playRound("0,4")).toBeFalsy();
+    });
 });
