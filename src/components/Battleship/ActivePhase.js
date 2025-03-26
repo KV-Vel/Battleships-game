@@ -16,10 +16,9 @@ export default class Battleship extends GamePhase {
         const { hitResult } = attackResultData;
         if (hitResult === "miss") this.#switchTurn();
 
-        // Move this deeper in logic?
         if (this.inactivePlayer.gameboard.isAllShipsSunk()) {
-            this.#statuses.isMatchEnded = true; // create setter
-            // this.isGameStarted = false; // create setter
+            this.isGameEnded = true;
+            this.isGameStarted = false;
             return `${this.activePlayer.name} won!`;
         }
 
@@ -30,7 +29,7 @@ export default class Battleship extends GamePhase {
 
     checkToStartGame() {
         if (this.#isBothPlayersReady()) {
-            this.#statuses.isGameStarted = true; // create setter
+            this.isGameStarted = true; // create setter
             return;
         }
         this.#switchTurn();
@@ -40,14 +39,19 @@ export default class Battleship extends GamePhase {
         return this.#statuses.isGameStarted;
     }
 
+    set isGameStarted(value) {
+        if (typeof value !== "boolean") return;
+        this.#statuses.isGameStarted = value;
+    }
+
     get isGameEnded() {
         return this.#statuses.isGameEnded;
     }
 
-    set isMatchEnded(result) {
+    set isGameEnded(result) {
         if (typeof result !== "boolean") return;
 
-        this.#statuses.isMatchEnded = result;
+        this.#statuses.isGameEnded = result;
     }
 
     #switchTurn() {
