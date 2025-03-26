@@ -170,6 +170,6 @@ export default class Gameboard {
 
     #isInputValid(coordinates) {
         const coordinatesRegExp = /\d+,\d+/gm;
-        return typeof coordinates === "string" || coordinatesRegExp.test(coordinates);
+        return typeof coordinates === "string" && coordinatesRegExp.test(coordinates);
     }
 }
