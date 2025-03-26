@@ -69,7 +69,6 @@ export default class BoardUI {
 
     toggleReadyBtn() {
         const readyBtn = document.querySelector(".ready-state-btn");
-
-        readyBtn.disabled ? (readyBtn.disabled = false) : (readyBtn.disabled = true);
+        readyBtn.toggleAttribute("disabled");
     }
 }
