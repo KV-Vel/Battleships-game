@@ -22,14 +22,13 @@ main {
 
 .board__wrapper {
     box-shadow: -20px 10px 13px 1px rgba(0, 0, 0, 0.352);
-    transform: rotateX(225deg) rotateZ(224deg) rotateY(180deg);
-    transform-style: preserve-3d;
 }
 
 /* divide style application and use :where to lower css specifity */
 .board__wrapper__row:where(:nth-child(even)) > .board__cell:where(:nth-child(odd)) {
     background-color: rgb(30, 128, 170);
 }
+
 .board__wrapper__row:where(:nth-child(odd)) > .board__cell:where(:nth-child(even)) {
     background-color: rgb(30, 128, 170);
 }
@@ -41,16 +40,6 @@ main {
 .board__wrapper__row:where(:nth-child(odd)) > .board__cell:where(:nth-child(odd)) {
     background-color: rgb(125, 204, 236);
 }
-/* .board__wrapper__row:nth-child(even) > .board__cell:nth-child(odd),
-.board__wrapper__row:nth-child(odd) > .board__cell:nth-child(even) {
-    background-color: rgb(30, 128, 170);
-} */
-
-/* .board__wrapper__row:nth-child(even) > .board__cell:nth-child(even),
-.board__wrapper__row:nth-child(odd) > .board__cell:nth-child(odd) {
-    background-color: rgb(125, 204, 236);
-} */
-
 
  .board__wrapper__row {
     display: flex;
@@ -60,46 +49,12 @@ main {
     perspective: 500px;
 }
 
-.board__wrapper__row:last-child > .board__cell::after {
-    content: "";
-    position: absolute;
-    border: .5px solid rgba(255, 255, 255, 0.938);
-    top: 19px;
-    width: 11px;
-    height: 100%;
-    transform: rotateX(209deg) rotateZ(270deg) rotateY(149deg) translateZ(152px) translateY(9px) skew(360deg, 42deg);
-    transform-style: preserve-3d;
-}
-
-.board__wrapper__row:last-child > .board__cell:nth-child(even)::after {
-    background-color: rgb(152, 213, 242);
-}
-
 .board__wrapper__row:last-child > .board__cell:nth-child(odd)::after {
     background-color: rgb(72, 153, 185);
-}
+} */
 
 .board__wrapper__row {
     perspective: 500px;
-}
-
-.board__wrapper__row > .board__cell:first-child:before {
-    content: "";
-    position: absolute;
-    border: .5px solid rgba(255, 255, 255, 0.938);
-    top: 13px;
-    width: 12px;
-    height: 119%;
-    transform: rotateX(146deg) rotateZ(191deg) rotateY(178deg) translateZ(51px) translateY(-50px) skew(-11deg, -39deg);
-    transform-style: preserve-3d;
-}
-
-.board__wrapper__row:nth-child(even) > .board__cell:first-child:before {
-    background-color: rgb(19, 96, 127);
-}
-
-.board__wrapper__row:nth-child(odd) > .board__cell:first-child:before {
-    background-color: rgb(93, 153, 174);
 }
 
 .board__cell {
@@ -123,10 +78,33 @@ main {
     background-color: rgb(210, 91, 131) !important;
 }
 
-.board__cell.ship {
+.board__cell.ship-placed {
     background-color: rgb(198, 198, 198);
 }
 
 button:disabled {
     cursor: auto;
 }
+
+.ship-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.ship {
+    display: flex;
+    gap: 5px;
+   
+}
+
+.ship-cell {
+    min-width: 40px;
+    min-height: 40px;
+    cursor: pointer;
+    background-color: lightgrey;
+}
+
+.ship-cell.active {
+    background-color: rgb(158, 158, 158);
+  }
