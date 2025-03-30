@@ -26,7 +26,11 @@ export default class Player {
 
         const shipCoordinates = this.gameboard.placeShip(coordinates, new Ship(size));
         this.#reduceShipsByOne(size);
-
+        // If placed coordinates return, we notify UI
+        if (shipCoordinates) {
+            pubsub.publish("addShip", [coordinates, this.name]);
+        }
+        // Do i need to return here?
         return shipCoordinates;
     }
 
@@ -40,7 +44,6 @@ export default class Player {
             for (let i = 0; i !== numberOfShips; i += 1) {
                 const randomCoordinates = this.randomizer.generateRandomCoordinates(shipSize);
                 const shipCoordinates = this.addShipToBoard(randomCoordinates, shipSize);
-                pubsub.publish("randomlyAdd", [randomCoordinates, this.name]);
                 this.randomizer.deleteShipPlacements(shipCoordinates);
             }
         }
