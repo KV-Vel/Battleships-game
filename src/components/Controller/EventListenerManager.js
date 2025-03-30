@@ -1,5 +1,4 @@
 import pubsub from "../../utils/PubSub";
-import Battleship from "../Battleship/ActivePhase";
 
 export default class EventListenerManager {
     constructor(gameStage, ui) {
@@ -10,6 +9,9 @@ export default class EventListenerManager {
             randomBtn: document.querySelector(".random-ship-placement"),
             boards: document.querySelectorAll(`.${this.ui.boardSelectorsNames.boardRoot}`),
             readyBtn: document.querySelector(".ready-state-btn"),
+            // Possible move to boardUI and get from there
+            shipCells: document.querySelectorAll(".ship-cell"),
+            shipEl: document.querySelectorAll(".ship"),
         };
 
         this.initEvtListeners();
@@ -17,15 +19,26 @@ export default class EventListenerManager {
 
     initEvtListeners() {
         this.selectors.randomBtn.addEventListener("click", () => this.onRandomShipPlacement());
-        this.selectors.boards.forEach(board => board.addEventListener("click", e => this.onPlayerAttack(e)));
+        this.selectors.boards.forEach(board => {
+            board.addEventListener("click", e => this.onPlayerAttack(e));
+            board.addEventListener("dragover", e => this.onDragOver(e));
+            board.addEventListener("drop", e => this.onDrop(e));
+        });
         this.selectors.readyBtn.addEventListener("click", () => this.onConfirmShipsPlacement());
+        this.selectors.shipCells.forEach(cell => {
+            // Apllying class and not using :hover. It's needed to identify child element which has been dragged
+            cell.addEventListener("mouseenter", e => e.target.classList.toggle("active"));
+            cell.addEventListener("mouseleave", e => e.target.classList.toggle("active"));
+        });
+        this.selectors.shipEl.forEach(ship => ship.addEventListener("dragstart", e => this.onDragStart(e)));
     }
 
-    // onShipPlacement(coordinates, size) {
-    //     if (this.gameStage.activePlayer.type === "AI") return;
+    onShipPlacement(coordinates, size) {
+        if (this.gameStage.activePlayer.type === "AI") return;
+        // Make placing ships on enemys board forbidden
 
-    //     this.gameStage.activePlayer.addShiptoBoard(coordinates, size);
-    // }
+        this.gameStage.activePlayer.addShipToBoard(coordinates, size);
+    }
 
     onRandomShipPlacement() {
         if (this.gameStage.activePlayer.type === "AI") return;
@@ -51,5 +64,43 @@ export default class EventListenerManager {
     onConfirmShipsPlacement() {
         this.gameStage.checkToStartGame();
         pubsub.publish("isReady");
+    }
+
+    onDragStart(e) {
+        e.dataTransfer.effectAllowed = "move";
+        // Getting cells of dragging ship
+        const [...childrens] = e.target.children;
+        const findActiveCellIndex = child => child.matches(".active");
+        const activeCellIndex = childrens.findIndex(findActiveCellIndex);
+
+        // Passing activeCell
+        e.dataTransfer.setData("active", activeCellIndex);
+        e.dataTransfer.setData("length", e.target.dataset.length);
+    }
+
+    onDragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+    }
+
+    onDrop(e) {
+        e.preventDefault();
+
+        const activeCellIndex = e.dataTransfer.getData("active");
+        const shipLength = e.dataTransfer.getData("length");
+        const [x, y] = e.target.dataset.coordinate.split(",");
+
+        // Searching for first coordinate where start of the ship will be, to place it with offset correctly
+        const firstCoordsAxis = y - activeCellIndex;
+        if (firstCoordsAxis < 0) return;
+
+        // Тут добавить if про горизонтально или вертикально
+        const result = [];
+
+        for (let i = 0; i < shipLength; i += 1) {
+            result.push([x, firstCoordsAxis + i].join(","));
+        }
+
+        this.onShipPlacement(result, shipLength);
     }
 }
