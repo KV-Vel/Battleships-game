@@ -56,8 +56,42 @@ export default class BoardUI {
         const playersBoard = document.querySelector(`[data-belonging = ${name}]`);
         coordinates.forEach(coordinate => {
             const uiCell = playersBoard.querySelector(`[data-coordinate = '${coordinate}']`);
-            uiCell.classList.add("ship");
+            uiCell.classList.add("ship-placed");
         });
+    }
+
+    createShipUI(length, className) {
+        const shipDiv = document.createElement("div");
+        shipDiv.setAttribute("data-length", length);
+        shipDiv.setAttribute("draggable", true);
+        shipDiv.className = className;
+
+        return shipDiv;
+    }
+
+    createShipCellUI(className) {
+        const shipCell = document.createElement("div");
+        shipCell.className = className;
+
+        return shipCell;
+    }
+
+    drawShips(shipsQuantity) {
+        // Function accept array of arrays [["4", 1]] or Map object
+        const shipWrapper = document.createElement("div");
+        shipWrapper.className = "ship-wrapper";
+        // eslint-disable-next-line no-restricted-syntax
+        for (const [shipSize, _] of shipsQuantity) {
+            const shipDiv = this.createShipUI(shipSize, "ship");
+            for (let j = 0; j < shipSize; j += 1) {
+                const shipCell = this.createShipCellUI("cell ship-cell");
+                shipDiv.append(shipCell);
+            }
+            shipWrapper.append(shipDiv);
+            this.boardToPlaceTo.append(shipWrapper);
+        }
+
+        // Куда-то корабли нужно выводить. Не забыть сделать стили для них, чтобы они накладывались друг на друга
     }
 
     displayAttackResult(data) {
