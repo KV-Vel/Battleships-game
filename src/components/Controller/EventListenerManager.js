@@ -12,6 +12,7 @@ export default class EventListenerManager {
             // Possible move to boardUI and get from there
             shipCells: document.querySelectorAll(".ship-cell"),
             shipEl: document.querySelectorAll(".ship"),
+            btnGroup: document.querySelector(".btn_group"),
         };
 
         this.initEvtListeners();
@@ -19,18 +20,19 @@ export default class EventListenerManager {
 
     initEvtListeners() {
         this.selectors.randomBtn.addEventListener("click", () => this.onRandomShipPlacement());
+        this.selectors.readyBtn.addEventListener("click", () => this.onConfirmShipsPlacement());
+        this.selectors.shipEl.forEach(ship => ship.addEventListener("dragstart", e => this.onDragStart(e)));
+        this.selectors.btnGroup.addEventListener("click", e => this.onAxisChange(e));
         this.selectors.boards.forEach(board => {
             board.addEventListener("click", e => this.onPlayerAttack(e));
             board.addEventListener("dragover", e => this.onDragOver(e));
             board.addEventListener("drop", e => this.onDrop(e));
         });
-        this.selectors.readyBtn.addEventListener("click", () => this.onConfirmShipsPlacement());
         this.selectors.shipCells.forEach(cell => {
             // Apllying class and not using :hover. It's needed to identify child element which has been dragged
             cell.addEventListener("mouseenter", e => e.target.classList.toggle("active"));
             cell.addEventListener("mouseleave", e => e.target.classList.toggle("active"));
         });
-        this.selectors.shipEl.forEach(ship => ship.addEventListener("dragstart", e => this.onDragStart(e)));
     }
 
     onShipPlacement(coordinates, size) {
@@ -67,7 +69,7 @@ export default class EventListenerManager {
     }
 
     onDragStart(e) {
-        e.dataTransfer.effectAllowed = "move";
+        // e.dataTransfer.effectAllowed = "move";
         // Getting cells of dragging ship
         const [...childrens] = e.target.children;
         const findActiveCellIndex = child => child.matches(".active");
@@ -76,11 +78,12 @@ export default class EventListenerManager {
         // Passing activeCell
         e.dataTransfer.setData("active", activeCellIndex);
         e.dataTransfer.setData("length", e.target.dataset.length);
+        e.dataTransfer.setData("axis", e.target.dataset.axis);
     }
 
     onDragOver(e) {
         e.preventDefault();
-        e.dataTransfer.dropEffect = "move";
+        // e.dataTransfer.dropEffect = "move";
     }
 
     onDrop(e) {
@@ -88,19 +91,39 @@ export default class EventListenerManager {
 
         const activeCellIndex = e.dataTransfer.getData("active");
         const shipLength = e.dataTransfer.getData("length");
+        const axis = e.dataTransfer.getData("axis");
         const [x, y] = e.target.dataset.coordinate.split(",");
 
         // Searching for first coordinate where start of the ship will be, to place it with offset correctly
-        const firstCoordsAxis = y - activeCellIndex;
-        if (firstCoordsAxis < 0) return;
+        const activeAxis = axis === "horizontal" ? y : x;
+        const firstCoordinateOfShip = activeAxis - activeCellIndex;
+
+        if (firstCoordinateOfShip < 0) return;
 
         // Тут добавить if про горизонтально или вертикально
         const result = [];
 
         for (let i = 0; i < shipLength; i += 1) {
-            result.push([x, firstCoordsAxis + i].join(","));
+            if (axis === "horizontal") {
+                result.push([x, firstCoordinateOfShip + i].join(","));
+            } else {
+                result.push([firstCoordinateOfShip + i, y].join(","));
+            }
         }
 
         this.onShipPlacement(result, shipLength);
     }
+
+    onAxisChange(e) {
+        if (e.target.matches(".vertical-axis-btn")) {
+            this.selectors.shipEl.forEach(ship => {
+                ship.style.cssText = "flex-direction: column;";
+                ship.dataset.axis = "vertical";
+            });
+        }
+    }
 }
+
+// create btn change axis, 
+// change ship attributes from horiz to vertic
+// pass attribute in on dROP
