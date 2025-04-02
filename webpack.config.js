@@ -11,12 +11,9 @@ module.exports = {
         path: path.resolve(__dirname, "dist"),
         clean: true,
     },
-    devtool:
-        process.env.NODE_ENV === "development"
-            ? "eval-source-map"
-            : "source-map",
+    devtool: process.env.NODE_ENV === "development" ? "eval-source-map" : "source-map",
     devServer: {
-        watchFiles: [".src/template.html"],
+        watchFiles: ["./src/template.html"],
     },
     plugins: [
         new HtmlWebpackPlugin({
