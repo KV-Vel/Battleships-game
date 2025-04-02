@@ -64,6 +64,7 @@ export default class BoardUI {
         const shipDiv = document.createElement("div");
         shipDiv.setAttribute("data-length", length);
         shipDiv.setAttribute("draggable", true);
+        shipDiv.setAttribute("data-axis", "horizontal");
         shipDiv.className = className;
 
         return shipDiv;
@@ -99,6 +100,35 @@ export default class BoardUI {
         const playersBoard = document.querySelector(`[data-belonging = ${playerReceivingHitName}]`);
         const uiCell = playersBoard.querySelector(`[data-coordinate = '${coordinates}']`);
         uiCell.classList.add(hitResult);
+    }
+
+    createBoardBtns() {
+        const div = document.createElement("div");
+        div.className = "btn_group";
+
+        const randomBtn = document.createElement("button");
+        randomBtn.type = "button";
+        randomBtn.className = "random-ship-placement";
+        randomBtn.textContent = "Random ship placement";
+
+        const confirmPlacementBtn = document.createElement("button");
+        confirmPlacementBtn.type = "button";
+        confirmPlacementBtn.className = "ready-state-btn";
+        confirmPlacementBtn.textContent = "Ready";
+
+        const horizontalAxisBtn = document.createElement("button");
+        horizontalAxisBtn.type = "button";
+        horizontalAxisBtn.textContent = "Horizontal";
+        horizontalAxisBtn.className = "horizontal-axis-btn";
+
+        const verticalAxisBtn = document.createElement("button");
+        verticalAxisBtn.type = "button";
+        verticalAxisBtn.textContent = "Vertical";
+        verticalAxisBtn.className = "vertical-axis-btn";
+
+        div.append(randomBtn, confirmPlacementBtn, horizontalAxisBtn, verticalAxisBtn);
+        const main = document.querySelector("main");
+        main.append(div);
     }
 
     toggleReadyBtn() {
