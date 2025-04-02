@@ -25,10 +25,11 @@ export default class Player {
         if (this.#shipsQuantity.get(size.toString()) === 0) return false;
 
         const shipCoordinates = this.gameboard.placeShip(coordinates, new Ship(size));
-        this.#reduceShipsByOne(size);
+        
         // If placed coordinates return, we notify UI
         if (shipCoordinates) {
             pubsub.publish("addShip", [coordinates, this.name]);
+            this.#reduceShipsByOne(size);
         }
         // Do i need to return here?
         return shipCoordinates;
