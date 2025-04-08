@@ -52,11 +52,15 @@ export default class BoardUI {
     }
 
     displayShip(data) {
-        const [coordinates, name] = data;
+        const { placedShipCoordinates, blockedCoordinates, name } = data;
         const playersBoard = document.querySelector(`[data-belonging = ${name}]`);
-        coordinates.forEach(coordinate => {
+        placedShipCoordinates.forEach(coordinate => {
             const uiCell = playersBoard.querySelector(`[data-coordinate = '${coordinate}']`);
             uiCell.classList.add("ship-placed");
+        });
+        blockedCoordinates.forEach(cell => {
+            const uiCell = playersBoard.querySelector(`[data-coordinate = '${cell}']`);
+            uiCell.classList.add("blocked");
         });
     }
 
@@ -96,10 +100,17 @@ export default class BoardUI {
     }
 
     displayAttackResult(data) {
-        const { coordinates, playerReceivingHitName, hitResult } = data;
+        const { coordinates, playerReceivingHitName, status, blockedCells } = data;
         const playersBoard = document.querySelector(`[data-belonging = ${playerReceivingHitName}]`);
-        const uiCell = playersBoard.querySelector(`[data-coordinate = '${coordinates}']`);
-        uiCell.classList.add(hitResult);
+        let uiCell = playersBoard.querySelector(`[data-coordinate = '${coordinates}']`);
+        uiCell.classList.add(status);
+
+        if (blockedCells) {
+            blockedCells.forEach(cell => {
+                uiCell = playersBoard.querySelector(`[data-coordinate = '${cell}'`);
+                uiCell.classList.add("miss");
+            });
+        }
     }
 
     createBoardBtns() {
@@ -115,6 +126,7 @@ export default class BoardUI {
         confirmPlacementBtn.type = "button";
         confirmPlacementBtn.className = "ready-state-btn";
         confirmPlacementBtn.textContent = "Ready";
+        confirmPlacementBtn.disabled = true;
 
         const horizontalAxisBtn = document.createElement("button");
         horizontalAxisBtn.type = "button";
