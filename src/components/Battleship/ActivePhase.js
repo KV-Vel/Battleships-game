@@ -10,16 +10,25 @@ export default class Battleship extends GamePhase {
 
     playRound(coordinates) {
         if (this.isGameEnded || !this.isGameStarted) return false;
-        const attackResultData = this.#playerAttacks(coordinates);
+
+        const attackResultData = this.activePlayer.attack(this.inactivePlayer.gameboard, coordinates);
         if (!attackResultData) return;
 
-        const { hitResult } = attackResultData;
-        if (hitResult === "miss") this.#switchTurn();
+        const { status } = attackResultData;
+
+        pubsub.publish("attack", {
+            playerReceivingHitName: this.inactivePlayer.name,
+            ...attackResultData,
+        });
 
         if (this.inactivePlayer.gameboard.isAllShipsSunk()) {
             this.isGameEnded = true;
             this.isGameStarted = false;
             return `${this.activePlayer.name} won!`;
+        }
+
+        if (status === "miss") {
+            this.#switchTurn();
         }
 
         if (this.activePlayer.type === "AI") {
@@ -59,15 +68,6 @@ export default class Battleship extends GamePhase {
 
         this.activePlayer = inactivePlayer;
         this.inactivePlayer = activePlayer;
-    }
-
-    #playerAttacks(coordinates) {
-        const hitResult = this.inactivePlayer.gameboard.receiveAttack(coordinates);
-        if (!hitResult) return;
-
-        pubsub.publish("attack", { coordinates: coordinates, playerReceivingHitName: this.inactivePlayer.name, hitResult });
-
-        return { coordinates: coordinates, playerReceivingHitName: this.inactivePlayer.name, hitResult };
     }
 
     #isBothPlayersReady() {
