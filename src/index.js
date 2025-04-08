@@ -8,7 +8,7 @@ import Gameboard from "./components/Gameboard/gameboard";
 import Battleship from "./components/Battleship/ActivePhase";
 import BoardUI from "./components/UI/BoardUI";
 import EventListenerManager from "./components/Controller/EventListenerManager";
-
+import AIbrains from "./components/Player/AIbrains";
 import pubsub from "./utils/PubSub";
 
 const ROWS = 10;
@@ -20,6 +20,10 @@ const settings = new Settings([
     ["2", 3],
     ["1", 4],
 ]);
+
+// const settings = new Settings([
+//     ["4", 6],
+// ]);
 
 const gameboard1 = new Gameboard(ROWS, COLS);
 const gameboard2 = new Gameboard(ROWS, COLS);
@@ -43,8 +47,8 @@ dialog.addEventListener("click", e => {
         // ui.drawShips
         //PUBSUB
         const player1 = new Player("p1", gameboard1, randomizer, settings.shipsQuantity);
-        const ai = new Player("ai", gameboard2, randomizer, settings.shipsQuantity);
-
+        const brains = new AIbrains();
+        const ai = new AI("ai", gameboard2, randomizer, settings.shipsQuantity, brains);
         const game = new Battleship(player1, ai);
 
         const domPlayField = document.querySelector(".play-field");
@@ -54,6 +58,7 @@ dialog.addEventListener("click", e => {
 
         pubsub.subscribe("addShip", ui.displayShip.bind(ui));
         pubsub.subscribe("attack", ui.displayAttackResult.bind(ui));
+        // pubsub.subscribe("shipSunk", ui.displaySurroundingShipCells.bind(ui));
         pubsub.subscribe("isReady", ui.toggleReadyBtn.bind(ui));
 
         ui.createBoard(ROWS, COLS, player1.name);
@@ -62,15 +67,6 @@ dialog.addEventListener("click", e => {
         dialog.close();
     }
 });
-
-// const settings = new Settings([
-//     ["4", 1],
-//     ["3", 2],
-//     ["2", 3],
-//     ["1", 4],
-// ]);
-
-
 
 // @todo block random ship if game started
 // @todo unused function in gameboard (clearBoard());
@@ -86,3 +82,6 @@ dialog.addEventListener("click", e => {
 // @todo Поубирать esling ignore и запихнуть их в конфиг
 // @todo Проверить переменные и оптяь поменять
 // @todo у drag n drop кораблей поменять gap и взять в учет border чтобы совпадало с клетками по размеру
+// @todo add static methods 
+// @todo Везде перепутаны координаты, где деструктурирующее присваивание [x, y] - у меня первым идет верткальное значение а не горизонатльное. Надо поменять
+// @todo Привести css классы к методологии БЭМ
