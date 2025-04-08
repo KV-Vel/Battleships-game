@@ -65,7 +65,13 @@ export default class EventListenerManager {
 
     onConfirmShipsPlacement() {
         this.gameStage.checkToStartGame();
-        pubsub.publish("isReady");
+
+        if (this.gameStage.activePlayer.type === "AI") {
+            this.gameStage.activePlayer.addShipsRandomly();
+            this.gameStage.checkToStartGame();
+        } else {
+            pubsub.publish("isReady");
+        }
     }
 
     onDragStart(e) {
@@ -122,4 +128,20 @@ export default class EventListenerManager {
             });
         }
     }
+
+    // activatePassDevice(inactivePlayerName) {
+        
+    //     const stash = {
+    //         shipCells: [],
+    //         blockedCells: [],
+    //     };
+    //     const playersBoard = document.querySelector(`[data-belonging = ${inactivePlayerName}]`);
+    //     const shipCells = playersBoard.querySelectorAll(".ship-placed");
+    //     const blockedCells = playersBoard.querySelectorAll(".blocked");
+
+    //     shipCells.forEach(cell => stash.shipCells.push(cell.dataset.coordinate));
+    //     blockedCells.forEach(cell => stash.blockedCells.push(cell.dataset.coordinate));
+
+    //     console.log(stash);
+    // }
 }

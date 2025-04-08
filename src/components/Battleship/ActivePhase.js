@@ -8,7 +8,12 @@ export default class Battleship extends GamePhase {
         isGameStarted: false,
     };
 
-    playRound(coordinates) {
+    constructor(player1, player2, passDevice) {
+        super(player1, player2);
+        this.passDevice = passDevice;
+    }
+
+    async playRound(coordinates) {
         if (this.isGameEnded || !this.isGameStarted) return false;
 
         const attackResultData = this.activePlayer.attack(this.inactivePlayer.gameboard, coordinates);
@@ -32,14 +37,14 @@ export default class Battleship extends GamePhase {
         }
 
         if (this.activePlayer.type === "AI") {
-            this.playRound(this.activePlayer.generateGuess());
+            const guess = await this.activePlayer.generateGuess();
+            this.playRound(guess);
         }
     }
 
     checkToStartGame() {
         if (this.#isBothPlayersReady()) {
             this.isGameStarted = true; // create setter
-            return;
         }
         this.#switchTurn();
     }
@@ -68,6 +73,10 @@ export default class Battleship extends GamePhase {
 
         this.activePlayer = inactivePlayer;
         this.inactivePlayer = activePlayer;
+
+        if (this.passDevice && this.#statuses.isGameStarted) {
+            this.passDevice.activatePassDevice(this.activePlayer.name, this.inactivePlayer.name);
+        }
     }
 
     #isBothPlayersReady() {
