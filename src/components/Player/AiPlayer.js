@@ -10,7 +10,7 @@ export default class AI extends Player {
         this.type = "AI";
         this.brains = brains;
         this.#guesses = this.#initGuesses();
-        this.addShipsRandomly();
+        // this.addShipsRandomly();
     }
 
     attack(enemyGameboard, attackCoordinate) {
@@ -50,7 +50,10 @@ export default class AI extends Player {
 
         pubsub.publish("aiCanAttack", guess);
 
-        return guess;
+        // Using 'third argument' to pass guess to resolve
+        return new Promise(resolve => {
+            setTimeout(resolve, 2000, guess);
+        });
     }
 
     #initGuesses() {
