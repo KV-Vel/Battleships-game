@@ -101,17 +101,23 @@ div > h3 {
     font-weight: 600;
 }
 
-.settings_groups__mode-selection > div {
-    display: flex;
-    justify-content: space-between;
+.mode-selection__btn-group {
+    display: grid;
+    grid-template-rows: 1;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
 }
 
 .mode_btn {
     padding: 10px;
     border-radius: 5px;
-    background-color: var(--tile-dark);
-    border: 1px solid black;
-    /* min-height: 100px; */
+    background-color: var(--tile-light);
+    border: 2px solid black;
+    font-size: .8rem;
+}
+
+.mode_btn:hover {
+    color: #fff;
 }
 
 .play-field {
@@ -160,7 +166,7 @@ div > h3 {
     background-color: lightgreen !important;
 }
  /* using board__wrapper_row selector and :is to make specifity higher */
-.board__wrapper__row > .board__cell:is(.hit) {
+.board__cell:is(.hit, .sunk) {
     background-color: rgb(210, 91, 131) !important;
 }
 
@@ -195,4 +201,8 @@ button:disabled {
 
 .ship-cell.active {
     background-color: rgb(158, 158, 158);
+  }
+
+  .blocked {
+    background-color: rgb(65 127 99 / 50%) !important;
   }
