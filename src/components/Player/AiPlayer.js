@@ -5,20 +5,52 @@ import pubsub from "../../utils/PubSub";
 export default class AI extends Player {
     #guesses;
 
-    constructor(name, gameboard, randomizer, shipsQuantity) {
+    constructor(name, gameboard, randomizer, shipsQuantity, brains) {
         super(name, gameboard, randomizer, shipsQuantity);
         this.type = "AI";
+        this.brains = brains;
         this.#guesses = this.#initGuesses();
         this.addShipsRandomly();
     }
 
-    generateGuess() {
-        const randomNumber = getRandomNum(0, this.#guesses.length);
-        const randomCoordinate = this.#guesses[randomNumber];
+    attack(enemyGameboard, attackCoordinate) {
+        const hitResult = enemyGameboard.receiveAttack(attackCoordinate);
+        if (!hitResult) return false;
+        let coordinatesToDelete = [attackCoordinate];
 
-        this.#deleteGuess(randomCoordinate);
-        pubsub.publish("aiCanAttack", randomCoordinate);
-        return randomCoordinate;
+        if (this.brains) {
+            if (hitResult.status === "sunk") {
+                this.brains.resetPossibleSmartGuesses();
+                coordinatesToDelete = [...hitResult.blockedCells, attackCoordinate];
+            }
+
+            if (hitResult.status === "hit") {
+                this.brains.generatePossibleSmartGuesses(enemyGameboard, attackCoordinate, this.#guesses);
+            }
+        }
+
+        this.#deleteGuess(coordinatesToDelete);
+
+        return {
+            coordinates: attackCoordinate,
+            status: hitResult.status,
+            blockedCells: hitResult.blockedCells,
+        };
+    }
+
+    generateGuess() {
+        let guess;
+
+        if (this.brains && this.brains.firstHit) {
+            guess = this.brains.makeSmartMove();
+        } else {
+            const randomNumber = getRandomNum(0, this.#guesses.length);
+            guess = this.#guesses[randomNumber];
+        }
+
+        pubsub.publish("aiCanAttack", guess);
+
+        return guess;
     }
 
     #initGuesses() {
@@ -28,7 +60,8 @@ export default class AI extends Player {
         return parsedBoard.flat();
     }
 
-    #deleteGuess(input) {
-        this.#guesses = this.#guesses.filter(coordinate => coordinate !== input);
+    #deleteGuess(guessesToDelete) {
+        const filtered = this.#guesses.filter(coordinate => !guessesToDelete.includes(coordinate));
+        this.#guesses = filtered;
     }
 }

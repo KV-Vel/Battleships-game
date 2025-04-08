@@ -20,19 +20,34 @@ export default class Player {
         this.type = "HUMAN";
     }
 
+    attack(enemyGameboard, coordinates) {
+        const hitResult = enemyGameboard.receiveAttack(coordinates);
+        if (!hitResult) return false;
+
+        return {
+            coordinates: coordinates,
+            status: hitResult.status,
+            blockedCells: hitResult.blockedCells,
+        };
+    }
+
     addShipToBoard(coordinates, size) {
         // Checking if player still have this ship size
         if (this.#shipsQuantity.get(size.toString()) === 0) return false;
 
-        const shipCoordinates = this.gameboard.placeShip(coordinates, new Ship(size));
-        
+        const [placedShipCoordinates, blockedCoordinates] = this.gameboard.placeShip(coordinates, new Ship(size));
+
         // If placed coordinates return, we notify UI
-        if (shipCoordinates) {
-            pubsub.publish("addShip", [coordinates, this.name]);
+        if (placedShipCoordinates) {
+            pubsub.publish("addShip", {
+                placedShipCoordinates,
+                blockedCoordinates,
+                name: this.name,
+            });
             this.#reduceShipsByOne(size);
         }
-        // Do i need to return here?
-        return shipCoordinates;
+        // // Do i need to return here?
+        return [placedShipCoordinates, blockedCoordinates];
     }
 
     addShipsRandomly() {
