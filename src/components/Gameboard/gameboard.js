@@ -1,3 +1,5 @@
+import pubsub from "../../utils/PubSub";
+
 export default class Gameboard {
     #gameboard;
 
@@ -35,6 +37,7 @@ export default class Gameboard {
             blockedCells,
             shipCoordinates: coordinates,
         };
+
         return [coordinates, blockedCells];
     }
 
@@ -52,16 +55,22 @@ export default class Gameboard {
             // If we hit then this cell is a ship
             const ship = cell;
             ship.hit();
+
             if (ship.isSunk()) {
                 this.#ships.shipsOnBoard -= 1;
-                // this.#ships[ship.identificator];
+                this.#gameboard[x][y] = "X";
+
+                const blockedCells = this.#ships[ship.identificator].blockedCells;
+                this.#attackedCoordinates.push(...blockedCells);
+
+                return { status: "sunk", blockedCells };
             }
             // after hitting one piece of Ship or not hitting, cell becomes unavailable
             this.#gameboard[x][y] = "X";
-            return "hit";
+            return { status: "hit", blockedCells: null };
         }
 
-        return "miss";
+        return { status: "miss", blockedCells: null };
     }
 
     isAllShipsSunk() {
@@ -147,7 +156,6 @@ export default class Gameboard {
             const [x, y] = separatedNums;
 
             const cell = this.getCell(x, y);
-
             return cell === "?" && cell !== "X";
         });
         return freeCoordinates.length === inputedCoordinates.length;
