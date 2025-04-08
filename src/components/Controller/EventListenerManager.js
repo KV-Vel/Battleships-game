@@ -123,7 +123,3 @@ export default class EventListenerManager {
         }
     }
 }
-
-// create btn change axis, 
-// change ship attributes from horiz to vertic
-// pass attribute in on dROP
