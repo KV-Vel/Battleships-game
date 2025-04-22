@@ -12,11 +12,6 @@ class PubSub {
         if (!this.subscribers[name]) return "No such subscriber";
         this.subscribers[name].forEach(sub => (data ? sub(data) : sub()));
     }
-
-    // No need it?
-    clean() {
-        this.subscribers = {};
-    }
 }
 
 const pubsub = new PubSub();
