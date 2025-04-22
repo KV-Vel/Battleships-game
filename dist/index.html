@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <title>Battleship</title>
+<script defer src="main.js"></script><link href="main.css" rel="stylesheet"></head>
+<body>
+    <header>
+        <h1>BATTLESHIP</h1>
+    </header>
+    <main>
+        <dialog  aria-label="Mode choose window" class="start-screen">
+              <div class="settings_groups">
+                  <h2>Settings</h2>
+                    <div class="settings_groups__sliders">
+                        <h3>Ships quantity</h3>
+                        <p class="note">Set ships quantity for each player!</p>
+                        <div class="headers">
+                            <h5>Ship size</h5>
+                            <h5>Slider</h5>
+                            <h5>Ship quantity</h5>
+                        </div>
+                        <div class="sliders-group">
+                            <div class="slider-mini-group">
+                                <label for="four-cell-ship">4</label>
+                                <input type="range" min="1" max="2" id="four-cell-ship" value="1" class="slider">
+                                <output role="status" for="four-cell-ship">1</output>
+                            </div>
+                            <div class="slider-mini-group">
+                                <label for="three-cell-ship">3</label>
+                                <input type="range" min="1" max="3" id="three-cell-ship" value="2" class="slider">
+                                <output role="status" for="three-cell-ship">2</output>
+                            </div>
+                            <div class="slider-mini-group">
+                                <label for="two-cell-ship">2</label>
+                                <input type="range" min="1" max="3" id="two-cell-ship" value="3" class="slider">
+                                <output role="status" for="two-cell-ship">3</output>
+                            </div>
+                            <div class="slider-mini-group">
+                                <label for="one-cell-ship">1</label>
+                                <input type="range" min="1" max="4" id="one-cell-ship" value="4" class="slider">
+                                <output for="one-cell-ship" role="status">4</output>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings_groups__ai-lvl">
+                        <h3>AI level</h3>
+                        <p class="note"><b>Silly</b> AI will hit random cells every round, while <b>Smart</b> AI will hit adjacent cells after hitting your ship.</p>
+                        <div class="toggle-wrapper">
+                            <span>Silly</span>
+                            <div class="toggle__inner-wrapper">
+                              <div class="circle" data-value="off"></div>
+                            </div>
+                            <span>Smart</span>
+                        </div>
+                    </div>
+                    <div class="settings_groups__mode-selection">
+                        <div class="mode-selection__btn-group">
+                            <button class="mode_btn" type="button" data-mode="pve">
+                                Player vs AI
+                            </button>
+                            <button class="mode_btn" type="button" data-mode="pvp">
+                                Player vs Player
+                            </button>
+                        </div>
+                    </div>
+              </div>
+        </dialog>
+        <div class="play-field"></div>
+    </main>
+    <footer>
+        <a href="https://github.com/KV-Vel">Github</a>
+    </footer>
+    <script src="https://kit.fontawesome.com/e35a6b4d49.js" crossorigin="anonymous"></script>
+</body>
+</html>
