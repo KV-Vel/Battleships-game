@@ -25,8 +25,9 @@ describe("initial statuses and players should be set", () => {
 });
 
 describe("game flow test", () => {
-    test("trying to attack cell if game is not started will return false", () => {
-        expect(game.playRound(["2,3"])).toBeFalsy();
+    test("trying to attack cell if game is not started will return false", async () => {
+        const attackResult = await game.playRound(["2,3"]);
+        expect(attackResult).toBeFalsy();
     });
 
     test("players should switch turns when active player placed all his ships and pressed confirm", () => {
@@ -79,17 +80,30 @@ describe("game flow test", () => {
         expect(game.isGameEnded).toBeTruthy();
     });
 
-    test("trying to attack cell if game has ended will return false", () => {
+    test("trying to attack cell if game has ended will return false", async () => {
         game.activePlayer.addShipToBoard(["0,0", "0,1", "0,2", "0,3"], 4);
         game.checkToStartGame();
         game.activePlayer.addShipToBoard(["0,0", "0,1", "0,2", "0,3"], 4);
         game.checkToStartGame();
 
-        game.playRound("0,0");
-        game.playRound("0,1");
-        game.playRound("0,2");
-        game.playRound("0,3");
+        await game.playRound("0,0");
+        await game.playRound("0,1");
+        await game.playRound("0,2");
+        await game.playRound("0,3");
 
-        expect(game.playRound("0,4")).toBeFalsy();
+        expect(await game.playRound("0,4")).toBeFalsy();
+    });
+
+    test("reseting game should set game statuses to false", () => {
+        game.activePlayer.addShipToBoard(["0,0", "0,1", "0,2", "0,3"], 4);
+        game.checkToStartGame();
+        game.activePlayer.addShipToBoard(["0,0", "0,1", "0,2", "0,3"], 4);
+        game.checkToStartGame();
+
+        expect(game.isGameStarted).toBeTruthy();
+
+        game.reset();
+
+        expect(game.isGameStarted).toBeFalsy();
     });
 });

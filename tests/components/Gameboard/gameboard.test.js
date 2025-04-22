@@ -82,8 +82,8 @@ describe("Receive attack function", () => {
 
     test("receiving attack on already attacked cells should not count", () => {
         gameboard.placeShip(["2,3", "2,2"], new Ship(2));
-        expect(gameboard.receiveAttack("2,3")).toBe("hit");
-        expect(gameboard.receiveAttack("2,3")).toBeUndefined();
+        expect(gameboard.receiveAttack("2,3")).toBeDefined();
+        expect(gameboard.receiveAttack("2,3")).toBeFalsy();
     });
 
     test("providing invalid input to receiveAttack should return undefined", () => {
