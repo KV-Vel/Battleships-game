@@ -1,29 +1,23 @@
 import getRandomNum from "../../utils/randomNum";
 
-export default class AIbrains {
+export default class AiBrains {
+    static #findDirection(firstCoords, lastCoords) {
+        // Destructuring only first part of coordinate => "2,3" => getting only 2
+        const [firstXCoords] = firstCoords.split(",");
+        const [lastXCoords] = lastCoords.split(",");
+        // If first number of coordinates is different that it is vertical, otherwise horizontal
+        return firstXCoords === lastXCoords ? "horizontal" : "vertical";
+    }
+
     #brainState = {
         firstHit: null,
         lastHit: null,
         attackDirection: null,
     };
 
-    generatePossibleSmartGuesses(enemyGameboard, coords, aiGuesses) {
-        if (!this.#brainState.firstHit) {
-            this.#brainState.firstHit = this.#setBrainStateHit(coords, enemyGameboard, aiGuesses);
-        } else {
-            this.#brainState.lastHit = this.#setBrainStateHit(coords, enemyGameboard, aiGuesses);
-
-            const foundAttackDirection = this.#findDirection(
-                this.#brainState.firstHit.initialHitCoords,
-                this.#brainState.lastHit.initialHitCoords,
-            );
-
-            this.#brainState.attackDirection = foundAttackDirection;
-            const directionToDelete = foundAttackDirection === "horizontal" ? "vertical" : "horizontal";
-
-            this.#brainState.firstHit[directionToDelete] = [];
-            this.#brainState.lastHit[directionToDelete] = [];
-        }
+    handleAttackResult(enemyBoard, attackingCoords, possibleGuesses, hitResultStatus) {
+        if (hitResultStatus === "sunk") this.resetPossibleSmartGuesses();
+        if (hitResultStatus === "hit") this.#generatePossibleSmartGuesses(enemyBoard, attackingCoords, possibleGuesses);
     }
 
     makeSmartMove() {
@@ -42,6 +36,7 @@ export default class AIbrains {
             return guess.join(",");
         }
 
+        // If we don't have lastHit then we random possible cell where ship might be
         randomAxis = this.#getRandomAxis(this.#brainState.firstHit);
         const randomAxisCoordIndex = getRandomNum(0, this.#brainState.firstHit[randomAxis].length);
 
@@ -50,6 +45,33 @@ export default class AIbrains {
         this.#brainState.firstHit[randomAxis] = reducedGuesses;
 
         return guess.join(",");
+    }
+
+    resetPossibleSmartGuesses() {
+        this.#brainState = {
+            firstHit: null,
+            lastHit: null,
+            attackDirection: null,
+        };
+    }
+
+    #generatePossibleSmartGuesses(enemyGameboard, coords, aiGuesses) {
+        if (!this.#brainState.firstHit) {
+            this.#brainState.firstHit = this.#setBrainStateHit(coords, enemyGameboard, aiGuesses);
+        } else {
+            this.#brainState.lastHit = this.#setBrainStateHit(coords, enemyGameboard, aiGuesses);
+
+            const foundAttackDirection = AiBrains.#findDirection(
+                this.#brainState.firstHit.initialHitCoords,
+                this.#brainState.lastHit.initialHitCoords,
+            );
+
+            this.#brainState.attackDirection = foundAttackDirection;
+            const directionToDelete = foundAttackDirection === "horizontal" ? "vertical" : "horizontal";
+
+            this.#brainState.firstHit[directionToDelete] = [];
+            this.#brainState.lastHit[directionToDelete] = [];
+        }
     }
 
     get firstHit() {
@@ -82,22 +104,6 @@ export default class AIbrains {
                 ([xCoords, yCoords]) => enemyGameboard.getCell(xCoords, yCoords) && !!aiGuesses.includes([xCoords, yCoords].join(",")),
             ),
         };
-    }
-
-    resetPossibleSmartGuesses() {
-        this.#brainState = {
-            initialHitCoords: null,
-            firstHit: null,
-            lastHit: null,
-            attackDirection: null,
-        };
-    }
-
-    #findDirection(firstCoords, lastCoords) {
-        const [firstXCoords, firstYCoords] = firstCoords.split(",");
-        const [lastXCoords, lastYCoords] = lastCoords.split(",");
-        // If first number of coordinates is different that it is vertical, otherwise horizontal
-        return firstXCoords === lastXCoords ? "horizontal" : "vertical";
     }
 
     #getRandomAxis(hitObject) {
