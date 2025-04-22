@@ -1,6 +1,27 @@
 import getRandomNum from "../../utils/randomNum";
 
 export default class ShipRandomizer {
+    static #traverseAllPossibleCoordinates(x, y) {
+        const rowsTwo = [
+            [x, y],
+            [x, y + 1],
+        ];
+        const rowsThree = [...rowsTwo, [x, y + 2]];
+        const rowsFour = [...rowsThree, [x, y + 3]];
+
+        const colsTwo = [
+            [x, y],
+            [x + 1, y],
+        ];
+        const colsThree = [...colsTwo, [x + 2, y]];
+        const colsFour = [...colsThree, [x + 3, y]];
+
+        return {
+            rows: [[[x, y]], rowsTwo, rowsThree, rowsFour],
+            cols: [[[x, y]], colsTwo, colsThree, colsFour],
+        };
+    }
+
     constructor(rows, cols) {
         this.rows = rows;
         this.cols = cols;
@@ -35,7 +56,6 @@ export default class ShipRandomizer {
 
     resetAvailableCoordinates() {
         // Rerunning #fillRandomShipPlacements will spike CPU usage. Making deep clone instead
-        // TODO: make better approach and write deleting cells into another object and then join them on reset function
         this.availableShipPlacements = JSON.parse(JSON.stringify(this.copy));
     }
 
@@ -49,7 +69,7 @@ export default class ShipRandomizer {
 
         for (let i = 0; i < boardCols; i += 1) {
             for (let j = 0; j < boardRows; j += 1) {
-                const allCoordinates = this.#traverseAllPossibleCoordinates(i, j);
+                const allCoordinates = ShipRandomizer.#traverseAllPossibleCoordinates(i, j);
 
                 const validRows = allCoordinates.rows.filter(row => this.#isCoordinatesValid(row));
                 const validCols = allCoordinates.cols.filter(col => this.#isCoordinatesValid(col));
@@ -66,27 +86,6 @@ export default class ShipRandomizer {
         }
 
         return shipPlacements;
-    }
-
-    #traverseAllPossibleCoordinates(x, y) {
-        const rowsTwo = [
-            [x, y],
-            [x, y + 1],
-        ];
-        const rowsThree = [...rowsTwo, [x, y + 2]];
-        const rowsFour = [...rowsThree, [x, y + 3]];
-
-        const colsTwo = [
-            [x, y],
-            [x + 1, y],
-        ];
-        const colsThree = [...colsTwo, [x + 2, y]];
-        const colsFour = [...colsThree, [x + 3, y]];
-
-        return {
-            rows: [[[x, y]], rowsTwo, rowsThree, rowsFour],
-            cols: [[[x, y]], colsTwo, colsThree, colsFour],
-        };
     }
 
     #isCoordinatesValid(inputedCoordinates) {
