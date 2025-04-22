@@ -8,9 +8,9 @@ export default class Battleship extends GamePhase {
         isGameStarted: false,
     };
 
-    constructor(player1, player2, passDevice) {
+    constructor(player1, player2, mode) {
         super(player1, player2);
-        this.passDevice = passDevice;
+        this.mode = mode;
     }
 
     async playRound(coordinates) {
@@ -28,6 +28,7 @@ export default class Battleship extends GamePhase {
 
         if (this.inactivePlayer.gameboard.isAllShipsSunk()) {
             this.isGameEnded = true;
+            pubsub.publish("gameEnded", this.activePlayer.name);
             this.isGameStarted = false;
             return `${this.activePlayer.name} won!`;
         }
@@ -44,9 +45,28 @@ export default class Battleship extends GamePhase {
 
     checkToStartGame() {
         if (this.#isBothPlayersReady()) {
-            this.isGameStarted = true; // create setter
+            this.isGameStarted = true;
+
+            if (this.mode === "pvp") {
+                this.#switchTurn();
+            }
+
+            return this.isGameStarted;
         }
+
         this.#switchTurn();
+    }
+
+    reset() {
+        this.isGameEnded = false;
+        this.isGameStarted = false;
+        this.activePlayer = this.player1;
+        this.inactivePlayer = this.player2;
+
+        this.activePlayer.reset();
+        this.inactivePlayer.reset();
+
+        pubsub.publish("reset", [this.activePlayer.name, this.inactivePlayer.name, this.isGameStarted]);
     }
 
     get isGameStarted() {
@@ -74,9 +94,7 @@ export default class Battleship extends GamePhase {
         this.activePlayer = inactivePlayer;
         this.inactivePlayer = activePlayer;
 
-        if (this.passDevice && this.#statuses.isGameStarted) {
-            this.passDevice.activatePassDevice(this.activePlayer.name, this.inactivePlayer.name);
-        }
+        pubsub.publish("takeTurn", [this.activePlayer.name, this.inactivePlayer.name, this.isGameStarted]);
     }
 
     #isBothPlayersReady() {
