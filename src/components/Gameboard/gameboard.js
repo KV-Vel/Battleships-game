@@ -1,5 +1,3 @@
-import pubsub from "../../utils/PubSub";
-
 export default class Gameboard {
     #gameboard;
 
@@ -10,16 +8,24 @@ export default class Gameboard {
         // here will be placed ship identificator and it's surrounding cells
     };
 
+    static #createBoard(rows, cols) {
+        return [...Array(rows)].map(() => Array(cols).fill("?"));
+    }
+
+    static #isInputValid(coordinates) {
+        const coordinatesRegExp = /\d+,\d+/gm;
+        return typeof coordinates === "string" && coordinatesRegExp.test(coordinates);
+    }
+
     constructor(rows, cols) {
         this.rows = rows;
         this.cols = cols;
-        this.#gameboard = this.#createBoard(this.rows, this.cols);
+        this.#gameboard = Gameboard.#createBoard(this.rows, this.cols);
     }
 
     placeShip(coordinates, ship) {
         if (coordinates.length !== ship.length) return false;
-        // If not overflowing map CHANGE VARIABLE NAME
-        if (!this.#isCoordinatesValid(coordinates)) return false;
+        if (!this.#isCoordinatesOverflow(coordinates)) return false;
         if (!this.#isCoordinatesFree(coordinates)) return false;
 
         coordinates.forEach(coordinate => {
@@ -32,7 +38,7 @@ export default class Gameboard {
         this.#ships.shipsOnBoard += 1;
 
         const blockedCells = this.#surroundShipWithBlockedCells(coordinates);
-        // Will be used to circle ship when it is destroyed or placed
+        // Will be used to surround ship when it is destroyed or placed
         this.#ships[ship.identificator] = {
             blockedCells,
             shipCoordinates: coordinates,
@@ -42,7 +48,7 @@ export default class Gameboard {
     }
 
     receiveAttack(coordinates) {
-        if (!this.#isInputValid(coordinates)) return;
+        if (!Gameboard.#isInputValid(coordinates)) return;
         const [x, y] = coordinates.split(",");
 
         if (!this.#isCellValid(x, y)) return;
@@ -60,12 +66,13 @@ export default class Gameboard {
                 this.#ships.shipsOnBoard -= 1;
                 this.#gameboard[x][y] = "X";
 
-                const blockedCells = this.#ships[ship.identificator].blockedCells;
-                this.#attackedCoordinates.push(...blockedCells);
+                // If ship is sunk, surrounding it with blockedCells, player can't attack those cells anymore
+                const shipBlockingCells = this.#ships[ship.identificator].blockedCells;
+                this.#attackedCoordinates.push(...shipBlockingCells);
 
-                return { status: "sunk", blockedCells };
+                return { status: "sunk", blockedCells: shipBlockingCells };
             }
-            // after hitting one piece of Ship or not hitting, cell becomes unavailable
+            // after hitting not hitting, cell becomes unavailable
             this.#gameboard[x][y] = "X";
             return { status: "hit", blockedCells: null };
         }
@@ -83,34 +90,20 @@ export default class Gameboard {
         return this.#gameboard[x][y];
     }
 
+    clearBoard() {
+        this.#gameboard = Gameboard.#createBoard(this.rows, this.cols);
+        this.#attackedCoordinates = [];
+        this.#ships = {
+            shipsOnBoard: 0,
+        };
+    }
+
     get myBattleField() {
         return this.#gameboard;
     }
 
     get quantityOfShips() {
         return this.#ships.shipsOnBoard;
-    }
-
-    // UNUSED!
-    #clearBoard() {
-        this.#gameboard = this.#createBoard(this.rows, this.cols);
-    }
-
-    #createBoard(rows, cols) {
-        return [...Array(rows)].map(() => Array(cols).fill("?"));
-    }
-
-    #surroundShipWithBlockedCells(shipCoordinates) {
-        const cellsSurroundingShip = this.#getSurroundingShipCells(shipCoordinates);
-        return cellsSurroundingShip.reduce((acc, str) => {
-            // converting to array. After being stored in Set
-            const separatedNums = str.split(",");
-            const [x, y] = separatedNums;
-
-            this.#gameboard[x][y] = "X";
-
-            return [...acc, str];
-        }, []);
     }
 
     #getSurroundingShipCells(coordinates) {
@@ -150,7 +143,20 @@ export default class Gameboard {
         return [...set];
     }
 
-    #isCoordinatesFree = inputedCoordinates => {
+    #surroundShipWithBlockedCells(shipCoordinates) {
+        const cellsSurroundingShip = this.#getSurroundingShipCells(shipCoordinates);
+        return cellsSurroundingShip.reduce((acc, str) => {
+            // converting to array. After being stored in Set
+            const separatedNums = str.split(",");
+            const [x, y] = separatedNums;
+
+            this.#gameboard[x][y] = "X";
+
+            return [...acc, str];
+        }, []);
+    }
+
+    #isCoordinatesFree(inputedCoordinates) {
         const freeCoordinates = inputedCoordinates.filter(coordinate => {
             const separatedNums = coordinate.split(",");
             const [x, y] = separatedNums;
@@ -159,9 +165,9 @@ export default class Gameboard {
             return cell === "?" && cell !== "X";
         });
         return freeCoordinates.length === inputedCoordinates.length;
-    };
+    }
 
-    #isCoordinatesValid(inputedCoordinates) {
+    #isCoordinatesOverflow(inputedCoordinates) {
         const validCoordinates = inputedCoordinates.filter(coordinate => {
             const separatedNums = coordinate.split(",");
             const [x, y] = separatedNums;
@@ -174,10 +180,5 @@ export default class Gameboard {
 
     #isCellValid(x, y) {
         return x >= 0 && x < this.rows && y >= 0 && y < this.cols;
-    }
-
-    #isInputValid(coordinates) {
-        const coordinatesRegExp = /\d+,\d+/gm;
-        return typeof coordinates === "string" && coordinatesRegExp.test(coordinates);
     }
 }
