@@ -1,6 +1,5 @@
 import Player from "./Player";
 import getRandomNum from "../../utils/randomNum";
-import pubsub from "../../utils/PubSub";
 
 export default class AI extends Player {
     #guesses;
@@ -9,8 +8,8 @@ export default class AI extends Player {
         super(name, gameboard, randomizer, shipsQuantity);
         this.type = "AI";
         this.brains = brains;
-        this.#guesses = this.#initGuesses();
-        // this.addShipsRandomly();
+        this.#guesses = this.#initPossibleGuesses();
+        this.addShipsRandomly();
     }
 
     attack(enemyGameboard, attackCoordinate) {
@@ -18,15 +17,12 @@ export default class AI extends Player {
         if (!hitResult) return false;
         let coordinatesToDelete = [attackCoordinate];
 
-        if (this.brains) {
-            if (hitResult.status === "sunk") {
-                this.brains.resetPossibleSmartGuesses();
-                coordinatesToDelete = [...hitResult.blockedCells, attackCoordinate];
-            }
+        if (hitResult.status === "sunk") {
+            coordinatesToDelete = [...hitResult.blockedCells, attackCoordinate];
+        }
 
-            if (hitResult.status === "hit") {
-                this.brains.generatePossibleSmartGuesses(enemyGameboard, attackCoordinate, this.#guesses);
-            }
+        if (this.brains) {
+            this.brains.handleAttackResult(enemyGameboard, attackCoordinate, this.#guesses, hitResult.status);
         }
 
         this.#deleteGuess(coordinatesToDelete);
@@ -48,15 +44,24 @@ export default class AI extends Player {
             guess = this.#guesses[randomNumber];
         }
 
-        pubsub.publish("aiCanAttack", guess);
-
         // Using 'third argument' to pass guess to resolve
         return new Promise(resolve => {
-            setTimeout(resolve, 2000, guess);
+            setTimeout(resolve, 1200, guess);
         });
     }
 
-    #initGuesses() {
+    reset() {
+        // Calling player reset()
+        super.reset();
+
+        if (this.brains) {
+            this.brains.resetPossibleSmartGuesses();
+        }
+        this.#guesses = this.#initPossibleGuesses();
+        this.addShipsRandomly();
+    }
+
+    #initPossibleGuesses() {
         // AI parsing gameboard cells to formulate possible guesses
         const parsedBoard = this.gameboard.myBattleField.map((row, indexX) => row.map((_, indexY) => [indexX, indexY].join()));
 
