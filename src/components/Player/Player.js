@@ -1,4 +1,4 @@
-import Ship from "../Ship/Ship";
+import Ship from "../Ship/ship";
 import pubsub from "../../utils/PubSub";
 
 export default class Player {
@@ -35,9 +35,11 @@ export default class Player {
         // Checking if player still have this ship size
         if (this.#shipsQuantity.get(size.toString()) === 0) return false;
 
-        const [placedShipCoordinates, blockedCoordinates] = this.gameboard.placeShip(coordinates, new Ship(size));
+        const placedValues = this.gameboard.placeShip(coordinates, new Ship(size));
+        if (!placedValues) return;
 
-        // If placed coordinates return, we notify UI
+        const [placedShipCoordinates, blockedCoordinates] = placedValues;
+
         if (placedShipCoordinates) {
             pubsub.publish("addShip", {
                 placedShipCoordinates,
@@ -45,17 +47,19 @@ export default class Player {
                 name: this.name,
             });
             this.#reduceShipsByOne(size);
+            pubsub.publish("updateShipsQuantity", this.shipsQuantity);
         }
-        // // Do i need to return here?
+
         return [placedShipCoordinates, blockedCoordinates];
     }
 
     addShipsRandomly() {
+        if (!this.randomizer) throw new Error("Can't place ship randomly if randomizer undefined");
+
         // Redeclaring shipsQuantity during each usage of this func
         this.#shipsQuantity = new Map(this.#shipsQuantityStaticCopy);
+        this.gameboard.clearBoard();
 
-        if (!this.randomizer) throw new Error("Can't place ship randomly if randomizer undefined");
-        // eslint-disable-next-line no-restricted-syntax
         for (const [shipSize, numberOfShips] of this.#shipsQuantity) {
             for (let i = 0; i !== numberOfShips; i += 1) {
                 const randomCoordinates = this.randomizer.generateRandomCoordinates(shipSize);
@@ -63,6 +67,7 @@ export default class Player {
                 this.randomizer.deleteShipPlacements(shipCoordinates);
             }
         }
+
         this.randomizer.resetAvailableCoordinates();
     }
 
@@ -77,13 +82,21 @@ export default class Player {
         return this.#statuses.readyToStart;
     }
 
+    reset() {
+        this.gameboard.clearBoard();
+        this.#shipsQuantity = new Map(this.#shipsQuantityStaticCopy);
+        this.#statuses.readyToStart = false;
+    }
+
+    get shipsQuantity() {
+        return this.#shipsQuantity;
+    }
+
     #reduceShipsByOne(size) {
         const strSize = size.toString();
         if (!strSize) return "Can't convert to str";
 
-        const initialValue = this.#shipsQuantity.get(strSize);
-        this.#shipsQuantity.set(strSize, initialValue - 1);
-
-        if (this.isReady()) pubsub.publish("isReady");
+        const previousValue = this.#shipsQuantity.get(strSize);
+        this.#shipsQuantity.set(strSize, previousValue - 1);
     }
 }
